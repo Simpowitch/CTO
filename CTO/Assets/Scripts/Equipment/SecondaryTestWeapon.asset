@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: SecondaryTestWeapon
   m_EditorClassIdentifier: 
   myValue: 0
-  myImage: {fileID: 0}
+  mySprite: {fileID: 21300000, guid: 049fea61e97c18f4abfe9bd6387a4f78, type: 3}
