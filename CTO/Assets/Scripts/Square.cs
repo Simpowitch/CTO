@@ -4,11 +4,39 @@ using UnityEngine;
 using UnityEditor;
 
 public enum Placement { Center, Up, Right, Down, Left }
-public enum Rotation { Up, Right, Down, Left}
+public enum Rotation { Up, Right, Down, Left }
 
 public class Square : MonoBehaviour
 {
     public List<GameObject> connectedObjects = new List<GameObject>();
+    public bool occupiedSpace = false;
+
+    public List<Square> surroundingSquares = new List<Square>();
+
+    private void Start()
+    {
+        SetSurroundingSquares();
+    }
+
+    private void SetSurroundingSquares()
+    {
+        for (int i = 0; i < GridSystem.instance.allSquares.Count; i++)
+        {
+            GridSystem.instance.allSquares[i].surroundingSquares.Clear();
+
+            Collider[] collisions = Physics.OverlapBox(GridSystem.instance.allSquares[i].transform.position, new Vector3(GridSystem.instance.GetSquareSize(), 0, GridSystem.instance.GetSquareSize()));
+
+            foreach (var item in collisions)
+            {
+                if (item.GetComponent<Square>() && item.GetComponent<Square>() != GridSystem.instance.allSquares[i])
+                {
+                    GridSystem.instance.allSquares[i].surroundingSquares.Add(item.GetComponent<Square>());
+                }
+            }
+        }
+    }
+
+
 
     public void CreateWall(GameObject objectToSpawn, Placement placement, Rotation rotation)
     {
@@ -65,7 +93,6 @@ public class Square : MonoBehaviour
         {
             DestroyImmediate(connectedObjects[i]);
         }
-
         connectedObjects.Clear();
     }
 
@@ -77,5 +104,30 @@ public class Square : MonoBehaviour
         }
 
         DestroyImmediate(this.gameObject);
+    }
+
+    public List<Square> path = new List<Square>();
+    private void OnMouseEnter()
+    {
+        if (CharacterManager.SelectedCharacter)
+        {
+            path = Pathfinding.GetPath(CharacterManager.SelectedCharacter.squareStandingOn, this);
+            //make square calculation, avoid obstacles
+            //display pathfinding
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        path.Clear();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        for (int i = 0; i < path.Count; i++)
+        {
+            Gizmos.DrawWireSphere(path[i].transform.position, 0.1f);
+        }
     }
 }

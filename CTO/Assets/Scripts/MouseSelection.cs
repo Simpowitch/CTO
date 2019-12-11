@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class MouseSelection : MonoBehaviour
 {
@@ -22,6 +21,7 @@ public class MouseSelection : MonoBehaviour
                 if (hit.transform.GetComponent<Character>())
                 {
                     CharacterManager.SelectedCharacter = hit.transform.GetComponent<Character>();
+                    Debug.Log("Character selected:" + CharacterManager.SelectedCharacter.gameObject.name);
                 }
             }
         }
@@ -40,9 +40,11 @@ public class MouseSelection : MonoBehaviour
                 if (hit.transform.GetComponent<Square>())
                 {
                     GridSystem.SelectedSquare = hit.transform.GetComponent<Square>();
-                    if (CharacterManager.SelectedCharacter)
+
+                    Debug.Log("Distance between character and target is: " + GridSystem.SelectedSquare.path.Count);
+                    if (CharacterManager.SelectedCharacter && CharacterManager.SelectedCharacter.canMove && CharacterManager.SelectedCharacter.range >= GridSystem.SelectedSquare.path.Count)
                     {
-                        CharacterManager.SelectedCharacter.GetComponent<NavMeshAgent>().SetDestination(GridSystem.SelectedSquare.transform.position);
+                        CharacterManager.instance.PerformMove();
                     }
                 }
             }

@@ -44,6 +44,10 @@ public class GridSystem : MonoBehaviour
 
 
     [SerializeField] float squareSize = 1f;
+    public float GetSquareSize()
+    {
+        return squareSize;
+    }
 
     [SerializeField] GameObject squarePrefab = null;
     public List<Square> allSquares = new List<Square>();
