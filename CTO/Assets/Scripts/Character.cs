@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-
 public class Character : MonoBehaviour
 {
     public bool canMove = false;
     public float range = 8f;
     public Square squareStandingOn;
+    public Team myTeam;
 
     private void Start()
     {
@@ -24,15 +24,35 @@ public class Character : MonoBehaviour
             }
         }
         squareStandingOn = closestSquare;
+        squareStandingOn.occupiedSpace = true;
     }
 
-    public void MoveCharacter(Square square)
+    public bool CanMoveToTarget(Square targetSquare)
+    {
+        return (Pathfinding.GetPath(squareStandingOn, targetSquare).Count <= range);
+    }
+
+    public bool TryToMove(Square targetSquare)
+    {
+        if (canMove && Pathfinding.GetPath(squareStandingOn, targetSquare).Count <= range)
+        {
+            MoveCharacter(targetSquare);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void MoveCharacter(Square newSquare)
     {
         squareStandingOn.occupiedSpace = false;
-        GetComponent<NavMeshAgent>().SetDestination(square.transform.position);
+        GetComponent<NavMeshAgent>().SetDestination(newSquare.transform.position);
         canMove = false;
-        squareStandingOn = square;
+        squareStandingOn = newSquare;
         squareStandingOn.occupiedSpace = true;
+        CharacterManager.SelectedCharacter = null;
     }
 
     public void NewTurn()

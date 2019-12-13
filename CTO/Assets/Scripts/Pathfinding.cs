@@ -28,10 +28,26 @@ public static class Pathfinding
 
     private static Square GetSquareTowardsEnd(Square origin, Square end)
     {
+        Vector3 heightOffset = new Vector3(0, 1, 0);
         Square closestSquare = null;
         float distanceToTarget = float.MaxValue;
         for (int i = 0; i < origin.surroundingSquares.Count; i++)
         {
+            if (origin.surroundingSquares[i].occupiedSpace)
+            {
+                continue;
+            }
+
+            RaycastHit hit;
+            if (Physics.SphereCast(origin.transform.position + heightOffset, 0.1f, origin.surroundingSquares[i].transform.position-origin.transform.position, out hit, GridSystem.instance.GetSquareSize()*2))
+            {
+                if (hit.transform.tag == "Obstacle")
+                {
+                    Debug.DrawLine(origin.transform.position + heightOffset, hit.transform.position);
+                    continue;
+                }
+            }
+
             float testDistance = Vector3.Distance(origin.surroundingSquares[i].transform.position, end.transform.position);
             if (testDistance < distanceToTarget)
             {

@@ -7,6 +7,11 @@ public class MouseSelection : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (TurnManager.instance.currentTurn != Team.Player)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             RaycastHit hit;
@@ -18,7 +23,7 @@ public class MouseSelection : MonoBehaviour
 
                 Vector3 roundedPos = GridSystem.instance.GetNearestPointOnGrid(hit.point);
                 Debug.Log(roundedPos);
-                if (hit.transform.GetComponent<Character>())
+                if (hit.transform.GetComponent<Character>() && hit.transform.GetComponent<Character>().myTeam == Team.Player)
                 {
                     CharacterManager.SelectedCharacter = hit.transform.GetComponent<Character>();
                     Debug.Log("Character selected:" + CharacterManager.SelectedCharacter.gameObject.name);
@@ -37,14 +42,14 @@ public class MouseSelection : MonoBehaviour
                 Vector3 roundedPos = GridSystem.instance.GetNearestPointOnGrid(hit.point);
                 Debug.Log(roundedPos);
 
-                if (hit.transform.GetComponent<Square>())
+                if (hit.transform.GetComponent<Square>() && !hit.transform.GetComponent<Square>().occupiedSpace)
                 {
                     GridSystem.SelectedSquare = hit.transform.GetComponent<Square>();
 
                     Debug.Log("Distance between character and target is: " + GridSystem.SelectedSquare.path.Count);
-                    if (CharacterManager.SelectedCharacter && CharacterManager.SelectedCharacter.canMove && CharacterManager.SelectedCharacter.range >= GridSystem.SelectedSquare.path.Count)
+                    if (CharacterManager.SelectedCharacter)
                     {
-                        CharacterManager.instance.PerformMove();
+                        CharacterManager.SelectedCharacter.TryToMove(hit.transform.GetComponent<Square>());
                     }
                 }
             }

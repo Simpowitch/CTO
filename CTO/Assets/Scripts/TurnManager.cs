@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Turn { Player, AI}
+public enum Team { Player, AI }
 public class TurnManager : MonoBehaviour
 {
     #region Singleton
@@ -21,44 +21,35 @@ public class TurnManager : MonoBehaviour
     }
     #endregion
 
-    [SerializeField] Turn currentTurn;
-    [SerializeField] List<Character> playerCharacters = new List<Character>();
-    [SerializeField] List<Character> aiCharacters = new List<Character>();
+    public Team currentTurn;
+    [SerializeField] Transform charactersParent = null;
+    List<Character> allCharacters = new List<Character>();
 
     private void Start()
     {
-        if (currentTurn == Turn.Player)
+        for (int i = 0; i < charactersParent.childCount; i++)
         {
-            for (int i = 0; i < playerCharacters.Count; i++)
-            {
-                playerCharacters[i].NewTurn();
-            }
+            allCharacters.Add(charactersParent.GetChild(i).GetComponent<Character>());
         }
-        else
+
+        for (int i = 0; i < allCharacters.Count; i++)
         {
-            for (int i = 0; i < aiCharacters.Count; i++)
+            if (allCharacters[i].myTeam == currentTurn)
             {
-                aiCharacters[i].NewTurn();
+                allCharacters[i].NewTurn();
             }
         }
     }
 
     public void ChangeTurn()
     {
-        currentTurn = currentTurn == Turn.Player ? Turn.AI : Turn.Player;
+        currentTurn = currentTurn == Team.Player ? Team.AI : Team.Player;
 
-        if (currentTurn == Turn.Player)
+        for (int i = 0; i < allCharacters.Count; i++)
         {
-            for (int i = 0; i < playerCharacters.Count; i++)
+            if (allCharacters[i].myTeam == currentTurn)
             {
-                playerCharacters[i].NewTurn();
-            }
-        }
-        else
-        {
-            for (int i = 0; i < aiCharacters.Count; i++)
-            {
-                aiCharacters[i].NewTurn();
+                allCharacters[i].NewTurn();
             }
         }
     }

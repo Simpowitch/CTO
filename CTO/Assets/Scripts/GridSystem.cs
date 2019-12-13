@@ -70,6 +70,7 @@ public class GridSystem : MonoBehaviour
                         newObj.transform.position = point;
                         allSquares.Add(newObj.GetComponent<Square>());
                         newObj.transform.SetParent(GameObject.Find("SquareParent").transform);
+                        newObj.name += layers[i].name + "X:" + x + "Z:" + z;
                     }
                 }
             }

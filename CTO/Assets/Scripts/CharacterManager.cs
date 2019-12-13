@@ -37,9 +37,4 @@ public class CharacterManager : MonoBehaviour
             //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
         }
     }
-
-    public void PerformMove()
-    {
-        SelectedCharacter.MoveCharacter(GridSystem.SelectedSquare);
-    }
 }
