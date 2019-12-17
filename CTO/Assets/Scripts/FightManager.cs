@@ -9,21 +9,21 @@ public class FightManager : MonoBehaviour
     [SerializeField] Camera cam;
     Vector3 originalPos;
     Quaternion originalRotation;
+
+    public float shootingTime = 2f;
+
     //public int camSpeed = 5;
 
-    public void InitiateShoot()
+    public void InitiateShoot(Character target)
     {
         originalPos = cam.transform.position;
         originalRotation = cam.transform.rotation;
 
-        StartCoroutine(MoveCamera(CharacterManager.SelectedCharacter.transform.position, CharacterManager.SelectedCharacter.transform.rotation));
-        shootingModeActivated = true;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        StartCoroutine(EnterShootMode(CharacterManager.SelectedCharacter.transform.position, target.transform.position, shootingTime));
     }
 
     float lerpSpeed;
-    IEnumerator MoveCamera(Vector3 endPos, Quaternion endRotation)
+    IEnumerator EnterShootMode(Vector3 endPos, Vector3 target, float time)
     {
         //lerpSpeed = (float)1 / (float)camSpeed;
         //int numOfIterations = camSpeed +1;
@@ -35,9 +35,25 @@ public class FightManager : MonoBehaviour
         //    yield return new WaitForEndOfFrame();
         //}
 
+        shootingModeActivated = true;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         cam.transform.position = endPos;
-        cam.transform.rotation = endRotation;
+        cam.transform.LookAt(target);
+        yield return new WaitForSeconds(time);
+        StartCoroutine(ExitShootMode());
+    }
+
+    IEnumerator ExitShootMode()
+    {
+        cam.transform.position = originalPos;
+        cam.transform.rotation = originalRotation;
+        shootingModeActivated = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         yield return null;
+        //do animation
     }
 
 
