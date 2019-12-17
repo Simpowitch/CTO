@@ -6,7 +6,7 @@ public class FightManager : MonoBehaviour
 {
     bool shootingModeActivated;
 
-    [SerializeField] Camera cam;
+    [SerializeField] Camera cam = null;
     Vector3 originalPos;
     Quaternion originalRotation;
 
@@ -25,15 +25,7 @@ public class FightManager : MonoBehaviour
     float lerpSpeed;
     IEnumerator EnterShootMode(Vector3 endPos, Vector3 target, float time)
     {
-        //lerpSpeed = (float)1 / (float)camSpeed;
-        //int numOfIterations = camSpeed +1;
-
-        //for (int i = 0; i < numOfIterations; i++)
-        //{
-        //    cam.transform.position = Vector3.Lerp(cam.transform.position, endPos, lerpSpeed);
-        //    cam.transform.rotation = Quaternion.Lerp(cam.transform.rotation, endRotation, lerpSpeed);
-        //    yield return new WaitForEndOfFrame();
-        //}
+        //Do Animation
 
         shootingModeActivated = true;
         Cursor.lockState = CursorLockMode.Locked;

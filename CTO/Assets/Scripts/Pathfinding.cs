@@ -17,7 +17,7 @@ public static class Pathfinding
             safety++;
             if (safety > 1000)
             {
-                Debug.LogWarning("Path not found");
+                Debug.Log("Path not found");
                 break;
             }
         }
@@ -39,7 +39,7 @@ public static class Pathfinding
             }
 
             RaycastHit hit;
-            if (Physics.SphereCast(origin.transform.position + heightOffset, 0.1f, origin.surroundingSquares[i].transform.position-origin.transform.position, out hit, GridSystem.instance.GetSquareSize()*2))
+            if (Physics.SphereCast(origin.transform.position + heightOffset, 0.1f, (origin.surroundingSquares[i].transform.position-origin.transform.position).normalized, out hit, Vector3.Distance(origin.transform.position, origin.surroundingSquares[i].transform.position)))
             {
                 if (hit.transform.tag == "Obstacle")
                 {

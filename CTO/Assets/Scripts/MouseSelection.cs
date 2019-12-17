@@ -28,6 +28,10 @@ public class MouseSelection : MonoBehaviour
                     CharacterManager.SelectedCharacter = hit.transform.GetComponent<Character>();
                     Debug.Log("Character selected:" + CharacterManager.SelectedCharacter.gameObject.name);
                 }
+                else
+                {
+                    CharacterManager.SelectedCharacter = null;
+                }
             }
         }
 

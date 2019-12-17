@@ -6,9 +6,13 @@ using UnityEngine.AI;
 public class Character : MonoBehaviour
 {
     public bool canMove = false;
-    public float range = 8f;
+    public int maxMovement = 8;
+    public int remainingMovement = 8;
     public Square squareStandingOn;
     public Team myTeam;
+
+    List<Square> validEndSquares = new List<Square>();
+
 
     private void Start()
     {
@@ -29,12 +33,12 @@ public class Character : MonoBehaviour
 
     public bool CanMoveToTarget(Square targetSquare)
     {
-        return (Pathfinding.GetPath(squareStandingOn, targetSquare).Count <= range);
+        return (canMove && validEndSquares.Contains(targetSquare));
     }
 
     public bool TryToMove(Square targetSquare)
     {
-        if (canMove && Pathfinding.GetPath(squareStandingOn, targetSquare).Count <= range)
+        if (CanMoveToTarget(targetSquare))
         {
             MoveCharacter(targetSquare);
             return true;
@@ -47,9 +51,9 @@ public class Character : MonoBehaviour
 
     public void MoveCharacter(Square newSquare)
     {
+        remainingMovement -= Pathfinding.GetPath(squareStandingOn, newSquare).Count;
         squareStandingOn.occupiedSpace = false;
         GetComponent<NavMeshAgent>().SetDestination(newSquare.transform.position);
-        canMove = false;
         squareStandingOn = newSquare;
         squareStandingOn.occupiedSpace = true;
         CharacterManager.SelectedCharacter = null;
@@ -58,5 +62,25 @@ public class Character : MonoBehaviour
     public void NewTurn()
     {
         canMove = true;
+        remainingMovement = maxMovement;
+    }
+
+    //Check for squares and squares that we can go to
+    public List<Square> CalculateValidMoves()
+    {
+        Vector3 checkBox = new Vector3(remainingMovement * GridSystem.instance.GetSquareSize(), 100, remainingMovement * GridSystem.instance.GetSquareSize());
+        Collider[] collisions = Physics.OverlapBox(this.transform.position, checkBox);
+
+        foreach (var item in collisions)
+        {
+            if (item.GetComponent<Square>() != null)
+            {
+                if (Pathfinding.GetPath(squareStandingOn, item.GetComponent<Square>()).Count <= remainingMovement && Vector3.Distance(squareStandingOn.transform.position, item.transform.position) <= remainingMovement)
+                {
+                    validEndSquares.Add(item.GetComponent<Square>());
+                }
+            }
+        }
+        return validEndSquares;
     }
 }

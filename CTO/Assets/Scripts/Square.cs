@@ -14,7 +14,6 @@ public class Square : MonoBehaviour
 
     public List<Square> surroundingSquares = new List<Square>();
 
-    //public List<Direction> blockedDirections = new List<Direction>();
 
     private void Start()
     {
@@ -88,7 +87,7 @@ public class Square : MonoBehaviour
         Vector3 pos = this.transform.position - new Vector3(0, this.transform.lossyScale.y / 2, 0);
         Vector3 rot = Vector3.zero;
 
-        Square affectedSecondarySquare = null;
+        //Square affectedSecondarySquare = null;
 
         float offset = 0.5f; //set in GridSystem
         switch (placement)
@@ -98,63 +97,15 @@ public class Square : MonoBehaviour
                 break;
             case Placement.North:
                 pos += new Vector3(0, 0, offset);
-
-                //blockedDirections.Add(Direction.North);
-                //blockedDirections.Add(Direction.NorthEast);
-                //blockedDirections.Add(Direction.NorthWest);
-
-                //affectedSecondarySquare = GetSurroundingSquare(Direction.North);
-                //if (affectedSecondarySquare)
-                //{
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.South);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.SouthEast);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.SouthWest);
-                //}
                 break;
             case Placement.East:
                 pos += new Vector3(offset, 0, 0);
-
-                //blockedDirections.Add(Direction.East);
-                //blockedDirections.Add(Direction.NorthEast);
-                //blockedDirections.Add(Direction.SouthEast);
-
-                //affectedSecondarySquare = GetSurroundingSquare(Direction.East);
-                //if (affectedSecondarySquare)
-                //{
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.West);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.NorthWest);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.SouthWest);
-                //}
                 break;
             case Placement.South:
                 pos += new Vector3(0, 0, -offset);
-
-                //blockedDirections.Add(Direction.South);
-                //blockedDirections.Add(Direction.SouthEast);
-                //blockedDirections.Add(Direction.SouthWest);
-
-                //affectedSecondarySquare = GetSurroundingSquare(Direction.South);
-                //if (affectedSecondarySquare)
-                //{
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.North);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.NorthEast);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.NorthWest);
-                //}
                 break;
             case Placement.West:
                 pos += new Vector3(-offset, 0, 0);
-
-                //blockedDirections.Add(Direction.West);
-                //blockedDirections.Add(Direction.NorthWest);
-                //blockedDirections.Add(Direction.SouthWest);
-
-                //affectedSecondarySquare = GetSurroundingSquare(Direction.West);
-                //if (affectedSecondarySquare)
-                //{
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.East);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.NorthEast);
-                //    affectedSecondarySquare.blockedDirections.Add(Direction.SouthEast);
-                //}
                 break;
         }
 
@@ -187,30 +138,6 @@ public class Square : MonoBehaviour
 
     public void ClearSquare()
     {
-        ////REMOVE BLCOKER DIRECTIONS FROM THIS AND OPPOSING SQUARE
-        //for (int i = 0; i < blockedDirections.Count; i++)
-        //{
-        //    switch (blockedDirections[i])
-        //    {
-        //        case Direction.North:
-        //            break;
-        //        case Direction.NorthEast:
-        //            break;
-        //        case Direction.East:
-        //            break;
-        //        case Direction.SouthEast:
-        //            break;
-        //        case Direction.South:
-        //            break;
-        //        case Direction.SouthWest:
-        //            break;
-        //        case Direction.West:
-        //            break;
-        //        case Direction.NorthWest:
-        //            break;
-        //    }
-        //}
-
         for (int i = 0; i < connectedObjects.Count; i++)
         {
             DestroyImmediate(connectedObjects[i]);
@@ -230,10 +157,19 @@ public class Square : MonoBehaviour
 
     public List<Square> path = new List<Square>();
     public bool allowedMove = false;
+
+
+
     private void OnMouseEnter()
     {
+        GridSystem.instance.MoveHighlight(this.transform.position);
+
         if (CharacterManager.SelectedCharacter)
         {
+            if (this.gameObject.name == "SquareGroundX:9Z:9")
+            {
+                Debug.Log("Found");
+            }
             path = Pathfinding.GetPath(CharacterManager.SelectedCharacter.squareStandingOn, this);
             //display pathfinding
             allowedMove = (CharacterManager.SelectedCharacter.CanMoveToTarget(this));
@@ -247,6 +183,10 @@ public class Square : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (!CharacterManager.SelectedCharacter)
+        {
+            return;
+        }
         Gizmos.color = allowedMove ? Color.green : Color.red;
 
         for (int i = 0; i < path.Count; i++)

@@ -20,6 +20,7 @@ public class CharacterManager : MonoBehaviour
     }
     #endregion
 
+    static List<Square> affectedSquares;
     private static Character selectedCharacter;
     public static Character SelectedCharacter
     {
@@ -29,12 +30,21 @@ public class CharacterManager : MonoBehaviour
         }
         set
         {
-            if (selectedCharacter)
+            if (selectedCharacter) //if not null
             {
+                //Reset old square
                 //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.defaultSquareMaterial;
+                GridSystem.instance.ChangeSquareVisuals(affectedSquares, SquareVisualMode.Default);
+                affectedSquares.Clear();
             }
+
             selectedCharacter = value;
-            //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
+            if (selectedCharacter) //if not null
+            {
+                //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
+                affectedSquares = selectedCharacter.CalculateValidMoves();
+                GridSystem.instance.ChangeSquareVisuals(affectedSquares, SquareVisualMode.Available);
+            }
         }
     }
 }

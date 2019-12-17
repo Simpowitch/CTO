@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+public enum SquareVisualMode { Default, Available, Selected }
+
 public class GridSystem : MonoBehaviour
 {
     #region Singleton
@@ -23,6 +25,9 @@ public class GridSystem : MonoBehaviour
 
     [SerializeField] Material defaultSquareMaterial = null;
     [SerializeField] Material selectedSquareMaterial = null;
+    [SerializeField] Material availableSquareMaterial = null;
+
+    [SerializeField] GameObject highlightObject = null;
 
     private static Square selectedSquare;
     public static Square SelectedSquare
@@ -39,6 +44,30 @@ public class GridSystem : MonoBehaviour
             }
             selectedSquare = value;
             selectedSquare.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
+        }
+    }
+
+    public void MoveHighlight(Vector3 newPos)
+    {
+        highlightObject.transform.position = newPos;
+    }
+
+    public void ChangeSquareVisuals(List<Square> squares, SquareVisualMode mode)
+    {
+        for (int i = 0; i < squares.Count; i++)
+        {
+            switch (mode)
+            {
+                case SquareVisualMode.Default:
+                    squares[i].gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.defaultSquareMaterial;
+                    break;
+                case SquareVisualMode.Available:
+                    squares[i].gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.availableSquareMaterial;
+                    break;
+                case SquareVisualMode.Selected:
+                    squares[i].gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
+                    break;
+            }
         }
     }
 
@@ -66,7 +95,7 @@ public class GridSystem : MonoBehaviour
                     point += new Vector3(0, squarePrefab.transform.lossyScale.y / 2, 0);
                     if (CheckIfUniqueSquarePos(point))
                     {
-                        GameObject newObj = (GameObject) PrefabUtility.InstantiatePrefab(squarePrefab);
+                        GameObject newObj = (GameObject)PrefabUtility.InstantiatePrefab(squarePrefab);
                         newObj.transform.position = point;
                         allSquares.Add(newObj.GetComponent<Square>());
                         newObj.transform.SetParent(GameObject.Find("SquareParent").transform);
