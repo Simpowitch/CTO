@@ -17,7 +17,6 @@ public static class Pathfinding
             safety++;
             if (safety > 1000)
             {
-                Debug.Log("Path not found");
                 break;
             }
         }

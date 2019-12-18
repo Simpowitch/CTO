@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class FightManager : MonoBehaviour
 {
+
+
     bool shootingModeActivated;
 
     [SerializeField] Camera cam = null;
@@ -14,12 +16,12 @@ public class FightManager : MonoBehaviour
 
     //public int camSpeed = 5;
 
-    public void InitiateShoot(Character target)
+    public void InitiateShoot()
     {
         originalPos = cam.transform.position;
         originalRotation = cam.transform.rotation;
 
-        StartCoroutine(EnterShootMode(CharacterManager.SelectedCharacter.transform.position, target.transform.position, shootingTime));
+        StartCoroutine(EnterShootMode(CharacterManager.SelectedCharacter.transform.position, CharacterManager.TargetCharacter.transform.position, shootingTime));
     }
 
     float lerpSpeed;

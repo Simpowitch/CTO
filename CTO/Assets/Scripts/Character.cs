@@ -10,6 +10,7 @@ public class Character : MonoBehaviour
     public int remainingMovement = 8;
     public Square squareStandingOn;
     public Team myTeam;
+    public float weaponRange = 50f;
 
     List<Square> validEndSquares = new List<Square>();
 
@@ -82,5 +83,27 @@ public class Character : MonoBehaviour
             }
         }
         return validEndSquares;
+    }
+
+    List<Character> possibleTargets = new List<Character>();
+    public List<Character> GetPossibleTargets()  { return possibleTargets; }
+
+    public List<Character> FindPossibleTargets()
+    {
+        possibleTargets.Clear();
+        Collider[] colliders = Physics.OverlapSphere(this.transform.position, weaponRange);
+
+        foreach (var item in colliders)
+        {
+            if (item.GetComponent<Character>())
+            {
+                if (Physics.Raycast(this.transform.position, item.transform.position - this.transform.position.normalized, out RaycastHit hit, weaponRange))
+                    if (hit.transform.GetComponent<Character>() && hit.transform.GetComponent<Character>().myTeam != myTeam)
+                    {
+                        possibleTargets.Add(item.GetComponent<Character>());
+                    }
+            }
+        }
+        return possibleTargets;
     }
 }

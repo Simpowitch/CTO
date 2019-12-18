@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+
 
 public class MouseSelection : MonoBehaviour
 {
@@ -12,6 +14,11 @@ public class MouseSelection : MonoBehaviour
             return;
         }
 
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             RaycastHit hit;
@@ -19,14 +26,21 @@ public class MouseSelection : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
-                Transform objectHit = hit.transform;
-
                 Vector3 roundedPos = GridSystem.instance.GetNearestPointOnGrid(hit.point);
-                Debug.Log(roundedPos);
-                if (hit.transform.GetComponent<Character>() && hit.transform.GetComponent<Character>().myTeam == Team.Player)
+
+                //If clicked on character
+                if (hit.transform.GetComponent<Character>())
                 {
-                    CharacterManager.SelectedCharacter = hit.transform.GetComponent<Character>();
-                    Debug.Log("Character selected:" + CharacterManager.SelectedCharacter.gameObject.name);
+                    Character mouseTargetCharacter = hit.transform.GetComponent<Character>();
+
+                    if (mouseTargetCharacter.myTeam == Team.Player)
+                    {
+                        CharacterManager.SelectedCharacter = mouseTargetCharacter;
+                    }
+                    else if (mouseTargetCharacter.myTeam == Team.AI)
+                    {
+                        CharacterManager.SelectedCharacter = null;
+                    }
                 }
                 else
                 {
@@ -42,20 +56,40 @@ public class MouseSelection : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
-                Transform objectHit = hit.transform;
                 Vector3 roundedPos = GridSystem.instance.GetNearestPointOnGrid(hit.point);
-                Debug.Log(roundedPos);
 
-                if (hit.transform.GetComponent<Square>() && !hit.transform.GetComponent<Square>().occupiedSpace)
+                //If clicked on square
+                if (hit.transform.GetComponent<Square>())
                 {
-                    GridSystem.SelectedSquare = hit.transform.GetComponent<Square>();
+                    Square clickedOnSquare = hit.transform.GetComponent<Square>();
 
-                    Debug.Log("Distance between character and target is: " + GridSystem.SelectedSquare.path.Count);
-                    if (CharacterManager.SelectedCharacter)
+                    if (clickedOnSquare.occupiedSpace)
                     {
-                        CharacterManager.SelectedCharacter.TryToMove(hit.transform.GetComponent<Square>());
+
+                    }
+                    else
+                    {
+                        GridSystem.SelectedSquare = clickedOnSquare;
+                        if (CharacterManager.SelectedCharacter)
+                        {
+                            CharacterManager.SelectedCharacter.TryToMove(hit.transform.GetComponent<Square>());
+                        }
                     }
                 }
+                //If clicked on character
+                else if (hit.transform.GetComponent<Character>())
+                    {
+                        Character mouseTargetCharacter = hit.transform.GetComponent<Character>();
+
+                        if (mouseTargetCharacter.myTeam == Team.Player)
+                        {
+
+                        }
+                        else if (mouseTargetCharacter.myTeam == Team.AI)
+                        {
+                            CharacterManager.TargetCharacter = mouseTargetCharacter;
+                        }
+                    }
             }
         }
     }

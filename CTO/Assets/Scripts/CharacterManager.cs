@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterManager : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class CharacterManager : MonoBehaviour
                 //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.defaultSquareMaterial;
                 GridSystem.instance.ChangeSquareVisuals(affectedSquares, SquareVisualMode.Default);
                 affectedSquares.Clear();
+                CharacterManager.instance.DisplayCharacterUI(false);
             }
 
             selectedCharacter = value;
@@ -44,7 +46,39 @@ public class CharacterManager : MonoBehaviour
                 //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
                 affectedSquares = selectedCharacter.CalculateValidMoves();
                 GridSystem.instance.ChangeSquareVisuals(affectedSquares, SquareVisualMode.Available);
+                CharacterManager.instance.DisplayCharacterUI(true);
             }
         }
+    }
+
+    private static Character targetCharacter;
+    public static Character TargetCharacter
+    {
+        get
+        {
+            return targetCharacter;
+        }
+        set
+        {
+            if (value == null)
+            {
+                targetCharacter = value;
+            }
+            else if (selectedCharacter)
+            {
+                if (selectedCharacter.GetPossibleTargets().Contains(value))
+                {
+                    targetCharacter = value;
+                }
+            }
+        }
+    }
+
+
+    [SerializeField] GameObject actionBar = null;
+    private void DisplayCharacterUI(bool state)
+    {
+        actionBar.SetActive(state);
+        selectedCharacter.FindPossibleTargets();
     }
 }
