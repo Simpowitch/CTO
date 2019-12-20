@@ -10,7 +10,12 @@ public class Character : MonoBehaviour
     public int remainingMovement = 8;
     public Square squareStandingOn;
     public Team myTeam;
-    public float weaponRange = 50f;
+
+    [SerializeField] int maxHP = 5;
+    [SerializeField] int currentHP = 5;
+    [SerializeField] int armor = 0;
+
+    public Weapon weapon = null;
 
     List<Square> validEndSquares = new List<Square>();
 
@@ -30,6 +35,15 @@ public class Character : MonoBehaviour
         }
         squareStandingOn = closestSquare;
         squareStandingOn.occupiedSpace = true;
+
+        //Temp weapon
+        weapon = new Weapon();
+        weapon.range = 20;
+        weapon.name = "TestWeapon2000";
+        weapon.damage = 1;
+        weapon.bulletsPerBurst = 3;
+        weapon.rpm = 500;
+        weapon.bulletsRemaining = weapon.bulletsPerBurst;
     }
 
     public bool CanMoveToTarget(Square targetSquare)
@@ -86,24 +100,42 @@ public class Character : MonoBehaviour
     }
 
     List<Character> possibleTargets = new List<Character>();
-    public List<Character> GetPossibleTargets()  { return possibleTargets; }
+    public List<Character> GetPossibleTargets() { return possibleTargets; }
 
     public List<Character> FindPossibleTargets()
     {
         possibleTargets.Clear();
-        Collider[] colliders = Physics.OverlapSphere(this.transform.position, weaponRange);
+        Collider[] colliders = Physics.OverlapSphere(this.transform.position, weapon.range);
 
         foreach (var item in colliders)
         {
             if (item.GetComponent<Character>())
             {
-                if (Physics.Raycast(this.transform.position, item.transform.position - this.transform.position.normalized, out RaycastHit hit, weaponRange))
+                if (Physics.Raycast(this.transform.position, item.transform.position - this.transform.position, out RaycastHit hit, Mathf.Infinity))
+                {
                     if (hit.transform.GetComponent<Character>() && hit.transform.GetComponent<Character>().myTeam != myTeam)
                     {
                         possibleTargets.Add(item.GetComponent<Character>());
                     }
+                }
             }
         }
         return possibleTargets;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHP -= (damage - armor);
+        if (currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        //insert animations etc.
+
+        GameObject.Destroy(this);
     }
 }

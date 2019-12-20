@@ -31,23 +31,24 @@ public class CharacterManager : MonoBehaviour
         }
         set
         {
+            //Reset old
             if (selectedCharacter) //if not null
             {
                 //Reset old square
                 //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.defaultSquareMaterial;
                 GridSystem.instance.ChangeSquareVisuals(affectedSquares, SquareVisualMode.Default);
                 affectedSquares.Clear();
-                CharacterManager.instance.DisplayCharacterUI(false);
             }
 
+            //Set new
             selectedCharacter = value;
             if (selectedCharacter) //if not null
             {
                 //selectedCharacter.gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
                 affectedSquares = selectedCharacter.CalculateValidMoves();
                 GridSystem.instance.ChangeSquareVisuals(affectedSquares, SquareVisualMode.Available);
-                CharacterManager.instance.DisplayCharacterUI(true);
             }
+            CharacterManager.instance.UpdateCharacterUI();
         }
     }
 
@@ -66,19 +67,21 @@ public class CharacterManager : MonoBehaviour
             }
             else if (selectedCharacter)
             {
+                selectedCharacter.FindPossibleTargets();
                 if (selectedCharacter.GetPossibleTargets().Contains(value))
                 {
                     targetCharacter = value;
                 }
             }
+            CharacterManager.instance.UpdateCharacterUI();
         }
     }
 
-
     [SerializeField] GameObject actionBar = null;
-    private void DisplayCharacterUI(bool state)
+    [SerializeField] Button shootButton = null;
+    private void UpdateCharacterUI()
     {
-        actionBar.SetActive(state);
-        selectedCharacter.FindPossibleTargets();
+        actionBar.SetActive((selectedCharacter));
+        shootButton.interactable = (selectedCharacter && targetCharacter);
     }
 }

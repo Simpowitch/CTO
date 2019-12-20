@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class FightManager : MonoBehaviour
 {
-
-
-    bool shootingModeActivated;
+    public static bool shootingModeActivated;
 
     [SerializeField] Camera cam = null;
     Vector3 originalPos;
     Quaternion originalRotation;
 
     public float shootingTime = 2f;
+
+
 
     //public int camSpeed = 5;
 
@@ -35,6 +35,11 @@ public class FightManager : MonoBehaviour
 
         cam.transform.position = endPos;
         cam.transform.LookAt(target);
+
+        activeWeapon = CharacterManager.SelectedCharacter.weapon;
+        timeBetweenShots = 60f / (float)activeWeapon.rpm;
+        shootCooldown = 0;
+
         yield return new WaitForSeconds(time);
         StartCoroutine(ExitShootMode());
     }
@@ -62,6 +67,10 @@ public class FightManager : MonoBehaviour
 
     float rotationY = 0F;
 
+    Weapon activeWeapon;
+    float shootCooldown;
+    float timeBetweenShots;
+
     private void Update()
     {
         if (shootingModeActivated)
@@ -72,6 +81,51 @@ public class FightManager : MonoBehaviour
             rotationY = Mathf.Clamp(rotationY, minimumY, maximumY);
 
             cam.transform.localEulerAngles = new Vector3(-rotationY, rotationX, 0);
+
+            if (Input.GetKey(KeyCode.Mouse0))
+            {
+                if (shootCooldown <= 0)
+                {
+                    if (activeWeapon.bulletsRemaining > 0)
+                    {
+                        Shoot();
+                    }
+                    else
+                    {
+                        Debug.Log("No more bullets");
+                    }
+                }
+                else
+                {
+                    shootCooldown -= Time.deltaTime;
+                }
+            }
+        }
+    }
+
+    private void Shoot()
+    {
+        shootCooldown = timeBetweenShots;
+        activeWeapon.bulletsRemaining--;
+
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            if (hit.transform.GetComponent<Character>())
+            {
+                hit.transform.GetComponent<Character>().TakeDamage(activeWeapon.damage);
+                Debug.Log("Target hit: " + hit.transform.name);
+            }
+            else
+            {
+                Debug.Log("Missed");
+            }
+        }
+        else
+        {
+            Debug.Log("Missed");
         }
     }
 }

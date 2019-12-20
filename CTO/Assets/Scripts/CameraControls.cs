@@ -20,6 +20,11 @@ public class CameraControls : MonoBehaviour
 
     private void Update()
     {
+        if (FightManager.shootingModeActivated)
+        {
+            return;
+        }
+
         float deltaYParentRotation = 0;
         Vector3 deltaParentMove = Vector3.zero;
 
