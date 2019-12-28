@@ -7,6 +7,7 @@ public enum Placement { Center, North, East, South, West }
 public enum Rotation { North, East, South, West }
 //public enum Direction { North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest }
 
+[System.Serializable]
 public class Square : MonoBehaviour
 {
     [SerializeField] List<GameObject> connectedObjects = new List<GameObject>();

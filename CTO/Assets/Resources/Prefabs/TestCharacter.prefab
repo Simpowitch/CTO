@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 6174480932970424791}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.5, y: 0.8, z: -1.5}
-  m_LocalScale: {x: 0.75, y: 0.8, z: 0.5}
+  m_LocalScale: {x: 0.75, y: 0.9, z: 0.5}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -130,3 +130,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67607e939a4d6b546bf608423cf47a7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canMove: 0
+  maxMovement: 8
+  remainingMovement: 8
+  squareStandingOn: {fileID: 0}
+  myTeam: 0
+  maxHP: 5
+  currentHP: 5
+  armor: 0
+  weapon:
+    name: 
+    damage: 0
+    rpm: 0
+    bulletsPerBurst: 0
+    bulletsRemaining: 0
+    range: 0
+  aiSquareRanking: []
+  weaponHeight: 1.2

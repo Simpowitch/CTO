@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public enum SquareVisualMode { Default, Available, Selected }
+public enum SquareVisualMode { Default, Available, Selected, Invisible, AIPointDebug }
 
 public class GridSystem : MonoBehaviour
 {
@@ -56,6 +56,8 @@ public class GridSystem : MonoBehaviour
     {
         for (int i = 0; i < squares.Count; i++)
         {
+            squares[i].gameObject.GetComponent<MeshRenderer>().enabled = true;
+            squares[i].transform.GetChild(0).gameObject.SetActive(false);
             switch (mode)
             {
                 case SquareVisualMode.Default:
@@ -67,7 +69,29 @@ public class GridSystem : MonoBehaviour
                 case SquareVisualMode.Selected:
                     squares[i].gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.selectedSquareMaterial;
                     break;
+                case SquareVisualMode.Invisible:
+                    squares[i].gameObject.GetComponent<MeshRenderer>().enabled = false;
+                    break;
+                case SquareVisualMode.AIPointDebug:
+                    squares[i].gameObject.GetComponent<MeshRenderer>().material = GridSystem.instance.availableSquareMaterial;
+                    squares[i].transform.GetChild(0).gameObject.SetActive(true);
+                    break;
             }
+        }
+    }
+
+    public void ChangeSquareVisualsAll(SquareVisualMode mode)
+    {
+        ChangeSquareVisuals(allSquares, mode);
+    }
+
+    public bool squareCollisionStatus = true;
+    public void ChangeSquareColliderStatus(bool toggle)
+    {
+        squareCollisionStatus = toggle;
+        for (int i = 0; i < allSquares.Count; i++)
+        {
+            allSquares[i].gameObject.GetComponent<Collider>().enabled = toggle;
         }
     }
 
@@ -146,7 +170,6 @@ public class GridSystem : MonoBehaviour
         result += transform.position - offset;
         return result;
     }
-
 
     [Header("Gizmos")]
     [SerializeField] float gizmoSize = 0.1f;

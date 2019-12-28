@@ -29,6 +29,9 @@ public class FightManager : MonoBehaviour
     {
         //Do Animation
 
+        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Invisible);
+
+
         shootingModeActivated = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -51,6 +54,11 @@ public class FightManager : MonoBehaviour
         shootingModeActivated = false;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        CharacterManager.SelectedCharacter = null;
+        CharacterManager.TargetCharacter = null;
+
+        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Default);
         yield return null;
         //do animation
     }

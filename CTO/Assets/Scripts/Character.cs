@@ -18,7 +18,13 @@ public class Character : MonoBehaviour
     public Weapon weapon = null;
 
     List<Square> validEndSquares = new List<Square>();
+    public List<Square> GetValidEndSquares() { return validEndSquares; }
 
+
+    public List<SquarePoint> aiSquareRanking = new List<SquarePoint>();
+    Vector3[] bodySensors = new Vector3[3] { new Vector3(0, 1.4f, 0), new Vector3(0, 1, 0), new Vector3(0, 0.3f, 0) };
+    public Vector3[] GetBodySensors() { return bodySensors; }
+    public float weaponHeight = 1.2f;
 
     private void Start()
     {
@@ -38,7 +44,7 @@ public class Character : MonoBehaviour
 
         //Temp weapon
         weapon = new Weapon();
-        weapon.range = 20;
+        weapon.range = 10;
         weapon.name = "TestWeapon2000";
         weapon.damage = 1;
         weapon.bulletsPerBurst = 3;
@@ -80,9 +86,16 @@ public class Character : MonoBehaviour
         remainingMovement = maxMovement;
     }
 
+
     //Check for squares and squares that we can go to
     public List<Square> CalculateValidMoves()
     {
+        bool originalSquareCollisionStatus = GridSystem.instance.squareCollisionStatus;
+        GridSystem.instance.ChangeSquareColliderStatus(true);
+
+        validEndSquares.Clear();
+        validEndSquares.Add(squareStandingOn);
+
         Vector3 checkBox = new Vector3(remainingMovement * GridSystem.instance.GetSquareSize(), 100, remainingMovement * GridSystem.instance.GetSquareSize());
         Collider[] collisions = Physics.OverlapBox(this.transform.position, checkBox);
 
@@ -96,6 +109,8 @@ public class Character : MonoBehaviour
                 }
             }
         }
+
+        GridSystem.instance.ChangeSquareColliderStatus(originalSquareCollisionStatus);
         return validEndSquares;
     }
 
@@ -136,6 +151,6 @@ public class Character : MonoBehaviour
     {
         //insert animations etc.
 
-        GameObject.Destroy(this);
+        GameObject.Destroy(this.gameObject);
     }
 }
