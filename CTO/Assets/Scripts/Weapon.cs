@@ -9,6 +9,6 @@ public class Weapon
     public int damage;
     public int rpm;
     public int bulletsPerBurst;
-    public int bulletsRemaining;
+    //public int bulletsRemaining;
     public int range;
 }

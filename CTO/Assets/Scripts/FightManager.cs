@@ -12,7 +12,7 @@ public class FightManager : MonoBehaviour
 
     public float shootingTime = 2f;
 
-
+    int bulletsRemaining;
 
     //public int camSpeed = 5;
 
@@ -42,6 +42,7 @@ public class FightManager : MonoBehaviour
         activeWeapon = CharacterManager.SelectedCharacter.weapon;
         timeBetweenShots = 60f / (float)activeWeapon.rpm;
         shootCooldown = 0;
+        bulletsRemaining = activeWeapon.bulletsPerBurst;
 
         yield return new WaitForSeconds(time);
         StartCoroutine(ExitShootMode());
@@ -94,13 +95,17 @@ public class FightManager : MonoBehaviour
             {
                 if (shootCooldown <= 0)
                 {
-                    if (activeWeapon.bulletsRemaining > 0)
+                    //if (activeWeapon.bulletsRemaining > 0)
+                    //{
+                    //Shoot();
+                    //}
+                    //else
+                    //{
+                    //    Debug.Log("No more bullets");
+                    //}
+                    if (bulletsRemaining > 0)
                     {
                         Shoot();
-                    }
-                    else
-                    {
-                        Debug.Log("No more bullets");
                     }
                 }
                 else
@@ -114,7 +119,8 @@ public class FightManager : MonoBehaviour
     private void Shoot()
     {
         shootCooldown = timeBetweenShots;
-        activeWeapon.bulletsRemaining--;
+        //activeWeapon.bulletsRemaining--;
+        bulletsRemaining--;
 
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

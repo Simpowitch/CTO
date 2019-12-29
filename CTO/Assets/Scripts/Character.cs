@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class Character : MonoBehaviour
 {
@@ -49,7 +50,7 @@ public class Character : MonoBehaviour
         weapon.damage = 1;
         weapon.bulletsPerBurst = 3;
         weapon.rpm = 500;
-        weapon.bulletsRemaining = weapon.bulletsPerBurst;
+        //weapon.bulletsRemaining = weapon.bulletsPerBurst;
     }
 
     public bool CanMoveToTarget(Square targetSquare)
@@ -147,10 +148,71 @@ public class Character : MonoBehaviour
         }
     }
 
+    float deathTimer = 0.5f;
     private void Die()
     {
         //insert animations etc.
 
-        GameObject.Destroy(this.gameObject);
+        GameObject.Destroy(this.gameObject, deathTimer);
+    }
+
+    bool drawGizmos = false;
+    private void OnMouseEnter()
+    {
+        if (GridSystem.instance.debugAIChoice)
+        {
+            DisplayDebug(true);
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        DisplayDebug(false);
+    }
+
+    private void DisplayDebug(bool state)
+    {
+        drawGizmos = state;
+        if (state)
+        {
+            GridSystem.instance.ChangeSquareVisuals(this.GetValidEndSquares(), SquareVisualMode.AIPointDebug);
+            foreach (var squarePoint in this.aiSquareRanking)
+            {
+                squarePoint.square.transform.GetComponentInChildren<Text>().text = squarePoint.points.ToString();
+            }
+        }
+        else
+        {
+            GridSystem.instance.ChangeSquareVisuals(this.GetValidEndSquares(), SquareVisualMode.Invisible);
+        }
+    }
+
+    public List<Line> debugHitOppertunities = new List<Line>();
+    public List<Line> debugExposureLines = new List<Line>();
+    public Line debugBestTarget;
+
+
+    private void OnDrawGizmos()
+    {
+        if (GridSystem.instance)
+        {
+            if (GridSystem.instance.debugAIChoice && drawGizmos)
+            {
+                Gizmos.color = Color.green;
+                for (int i = 0; i < debugHitOppertunities.Count; i++)
+                {
+                    Gizmos.DrawLine(debugHitOppertunities[i].startPos, debugHitOppertunities[i].endPos);
+                }
+
+                Gizmos.color = Color.red;
+                for (int i = 0; i < debugExposureLines.Count; i++)
+                {
+                    Gizmos.DrawLine(debugExposureLines[i].startPos, debugExposureLines[i].endPos);
+                }
+
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(debugBestTarget.startPos, debugBestTarget.endPos);
+            }
+        }
     }
 }

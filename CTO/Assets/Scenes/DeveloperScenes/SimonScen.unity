@@ -20298,6 +20298,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad9b3a4ad58b0c94b8e3d1c6787f5429, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugAIChoice: 1
   defaultSquareMaterial: {fileID: 2100000, guid: 65701f610cb4ee847805edc422e8b496,
     type: 2}
   selectedSquareMaterial: {fileID: 2100000, guid: c15b52d79f06e9847ae287079932995e,
@@ -20790,15 +20791,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08151640877fa8644a187de563d79917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugAIChoice: 1
   aiCharacters:
   - {fileID: 1424700729}
   detectedEnemies:
   - {fileID: 1495673438}
   - {fileID: 156400962}
-  enemiesInRange: []
   hitReward: 2
   exposurePenalty: 1
+  bulletBlueprint: {fileID: 9012477022660486460, guid: 832f63b01a233ab4eb3b4d5d93b7b049,
+    type: 3}
 --- !u!1001 &1164493663
 PrefabInstance:
   m_ObjectHideFlags: 0

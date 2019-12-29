@@ -23,6 +23,9 @@ public class GridSystem : MonoBehaviour
     }
     #endregion
 
+    public bool debugAIChoice = false;
+
+
     [SerializeField] Material defaultSquareMaterial = null;
     [SerializeField] Material selectedSquareMaterial = null;
     [SerializeField] Material availableSquareMaterial = null;
