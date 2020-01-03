@@ -30,21 +30,15 @@ public static class Pathfinding
         Vector3 heightOffset = new Vector3(0, 1, 0);
         Square closestSquare = null;
         float distanceToTarget = float.MaxValue;
-        for (int i = 0; i < origin.surroundingSquares.Count; i++)
+        for (int i = 0; i < origin.surroundingSquares.Length; i++)
         {
-            if (origin.surroundingSquares[i].occupiedSpace)
+            if (origin.surroundingSquares[i] == null)
             {
                 continue;
             }
-
-            RaycastHit hit;
-            if (Physics.SphereCast(origin.transform.position + heightOffset, 0.1f, (origin.surroundingSquares[i].transform.position-origin.transform.position).normalized, out hit, Vector3.Distance(origin.transform.position, origin.surroundingSquares[i].transform.position)))
+            if (!origin.CanMoveTo((Direction)i))
             {
-                if (hit.transform.tag == "Obstacle")
-                {
-                    Debug.DrawLine(origin.transform.position + heightOffset, hit.transform.position);
-                    continue;
-                }
+                continue;
             }
 
             float testDistance = Vector3.Distance(origin.surroundingSquares[i].transform.position, end.transform.position);

@@ -5,108 +5,125 @@ using UnityEditor;
 
 public enum Placement { Center, North, East, South, West }
 public enum Rotation { North, East, South, West }
-//public enum Direction { North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest }
+public enum Direction { North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest }
 
 [System.Serializable]
 public class Square : MonoBehaviour
 {
-    [SerializeField] List<GameObject> connectedObjects = new List<GameObject>();
     public bool occupiedSpace = false;
 
-    public List<Square> surroundingSquares = new List<Square>();
+    public Square[] surroundingSquares = new Square[8]; //direction
+    public GameObject[] objects = new GameObject[5]; //placement
 
 
-    private void Start()
+    public bool CanMoveTo(Direction dir)
     {
-        SetSurroundingSquares();
-    }
-
-    private void SetSurroundingSquares()
-    {
-        for (int i = 0; i < GridSystem.instance.allSquares.Count; i++)
+        switch (dir)
         {
-            GridSystem.instance.allSquares[i].surroundingSquares.Clear();
-
-            Collider[] collisions = Physics.OverlapBox(GridSystem.instance.allSquares[i].transform.position, new Vector3(GridSystem.instance.GetSquareSize(), 0, GridSystem.instance.GetSquareSize()));
-
-            foreach (var item in collisions)
-            {
-                if (item.GetComponent<Square>() && item.GetComponent<Square>() != GridSystem.instance.allSquares[i])
+            case Direction.North:
+                if (objects[(int)Placement.North])
                 {
-                    GridSystem.instance.allSquares[i].surroundingSquares.Add(item.GetComponent<Square>());
+                    return false;
                 }
+                break;
+            case Direction.NorthEast:
+                if (objects[(int)Placement.North])
+                {
+                    return false;
+                }
+                if (objects[(int)Placement.East])
+                {
+                    return false;
+                }
+                break;
+            case Direction.East:
+                if (objects[(int)Placement.East])
+                {
+                    return false;
+                }
+                break;
+            case Direction.SouthEast:
+                if (objects[(int)Placement.East])
+                {
+                    return false;
+                }
+                if (objects[(int)Placement.South])
+                {
+                    return false;
+                }
+                break;
+            case Direction.South:
+                if (objects[(int)Placement.South])
+                {
+                    return false;
+                }
+                break;
+            case Direction.SouthWest:
+                if (objects[(int)Placement.South])
+                {
+                    return false;
+                }
+                if (objects[(int)Placement.West])
+                {
+                    return false;
+                }
+                break;
+            case Direction.West:
+                if (objects[(int)Placement.West])
+                {
+                    return false;
+                }
+                break;
+            case Direction.NorthWest:
+                if (objects[(int)Placement.West])
+                {
+                    return false;
+                }
+                if (objects[(int)Placement.North])
+                {
+                    return false;
+                }
+                break;
+        }
+
+        if (surroundingSquares[(int)dir] != null)
+        {
+            if (surroundingSquares[(int)dir].occupiedSpace)
+            {
+                return false;
             }
         }
+
+        return true;
     }
 
-    //public Square GetSurroundingSquare(Direction direction)
-    //{
-    //    Vector3 posToCheck = this.transform.position;
-    //    float offset = 1; //Set in gridsystem
-
-    //    switch (direction)
-    //    {
-    //        case Direction.North:
-    //            posToCheck += new Vector3(0, 0, offset);
-    //            break;
-    //        case Direction.NorthEast:
-    //            posToCheck += new Vector3(offset, 0, offset);
-    //            break;
-    //        case Direction.East:
-    //            posToCheck += new Vector3(offset, 0, 0);
-    //            break;
-    //        case Direction.SouthEast:
-    //            posToCheck += new Vector3(offset, 0, -offset);
-    //            break;
-    //        case Direction.South:
-    //            posToCheck += new Vector3(0, 0, -offset);
-    //            break;
-    //        case Direction.SouthWest:
-    //            posToCheck += new Vector3(-offset, 0, -offset);
-    //            break;
-    //        case Direction.West:
-    //            posToCheck += new Vector3(-offset, 0, 0);
-    //            break;
-    //        case Direction.NorthWest:
-    //            posToCheck += new Vector3(offset, 0, -offset);
-    //            break;
-    //    }
-
-    //    for (int i = 0; i < surroundingSquares.Count; i++)
-    //    {
-    //        if (posToCheck == surroundingSquares[i].transform.position)
-    //        {
-    //            return surroundingSquares[i];
-    //        }
-    //    }
-    //    Debug.LogWarning("Square not found");
-    //    return null;
-    //}
-
-    public void CreateWall(GameObject objectToSpawn, Placement placement, Rotation rotation)
+    public void CreateObject(GameObject objectToSpawn, Placement placement, Rotation rotation)
     {
         Vector3 pos = this.transform.position - new Vector3(0, this.transform.lossyScale.y / 2, 0);
         Vector3 rot = Vector3.zero;
 
-        //Square affectedSecondarySquare = null;
-
-        float offset = 0.5f; //set in GridSystem
+        float offset = 0.5f; //half a square
         switch (placement)
         {
             default:
             case Placement.Center:
+                occupiedSpace = true;
                 break;
             case Placement.North:
                 pos += new Vector3(0, 0, offset);
+                rotation = Rotation.North;
                 break;
             case Placement.East:
                 pos += new Vector3(offset, 0, 0);
+                rotation = Rotation.East;
                 break;
             case Placement.South:
                 pos += new Vector3(0, 0, -offset);
+                rotation = Rotation.South;
                 break;
             case Placement.West:
                 pos += new Vector3(-offset, 0, 0);
+                rotation = Rotation.West;
                 break;
         }
 
@@ -130,7 +147,31 @@ public class Square : MonoBehaviour
         GameObject obj = (GameObject)PrefabUtility.InstantiatePrefab(objectToSpawn);
         obj.transform.position = pos;
         obj.transform.eulerAngles = rot;
-        connectedObjects.Add(obj);
+        objects[(int)placement] = obj;
+
+        switch (placement)
+        {
+            default:
+            case Placement.Center:
+                break;
+            case Placement.North:
+                surroundingSquares[(int)Direction.North].objects[(int)Placement.South] = obj;
+                EditorUtility.SetDirty(surroundingSquares[(int)Direction.North]);
+                break;
+            case Placement.East:
+                surroundingSquares[(int)Direction.East].objects[(int)Placement.West] = obj;
+                EditorUtility.SetDirty(surroundingSquares[(int)Direction.East]);
+                break;
+            case Placement.South:
+                surroundingSquares[(int)Direction.South].objects[(int)Placement.North] = obj;
+                EditorUtility.SetDirty(surroundingSquares[(int)Direction.South]);
+                break;
+            case Placement.West:
+                surroundingSquares[(int)Direction.West].objects[(int)Placement.East] = obj;
+                EditorUtility.SetDirty(surroundingSquares[(int)Direction.West]);
+                break;
+        }
+
         obj.transform.SetParent(GameObject.Find("ObjectParent").transform);
         obj.tag = "Obstacle";
 
@@ -139,22 +180,41 @@ public class Square : MonoBehaviour
 
     public void ClearSquare()
     {
-        for (int i = 0; i < connectedObjects.Count; i++)
+        for (int i = 0; i < objects.Length; i++)
         {
-            DestroyImmediate(connectedObjects[i]);
+            if (objects[i])
+            {
+                DestroyImmediate(objects[i]);
+                objects[i] = null;
+
+                Placement placement = (Placement)i;
+                switch (placement)
+                {
+                    case Placement.Center:
+                        break;
+                    case Placement.North:
+                        surroundingSquares[(int)Direction.North].objects[(int)Placement.South] = null;
+                        break;
+                    case Placement.East:
+                        surroundingSquares[(int)Direction.East].objects[(int)Placement.West] = null;
+                        break;
+                    case Placement.South:
+                        surroundingSquares[(int)Direction.South].objects[(int)Placement.North] = null;
+                        break;
+                    case Placement.West:
+                        surroundingSquares[(int)Direction.East].objects[(int)Placement.East] = null;
+                        break;
+                }
+            }
         }
-        connectedObjects.Clear();
     }
 
     public void DeleteSquare()
     {
-        for (int i = 0; i < connectedObjects.Count; i++)
-        {
-            DestroyImmediate(connectedObjects[i]);
-        }
-
+        ClearSquare();
         DestroyImmediate(this.gameObject);
     }
+
 
     public List<Square> path = new List<Square>();
     public bool allowedMove = false;

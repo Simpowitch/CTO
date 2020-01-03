@@ -73,7 +73,7 @@ public class Character : MonoBehaviour
 
     public void MoveCharacter(Square newSquare)
     {
-        remainingMovement -= Pathfinding.GetPath(squareStandingOn, newSquare).Count;
+        remainingMovement -= Mathf.CeilToInt(Vector3.Distance(squareStandingOn.transform.position, newSquare.transform.position)); //Pathfinding.GetPath(squareStandingOn, newSquare).Count;
         squareStandingOn.occupiedSpace = false;
         GetComponent<NavMeshAgent>().SetDestination(newSquare.transform.position);
         squareStandingOn = newSquare;
@@ -87,7 +87,6 @@ public class Character : MonoBehaviour
         remainingMovement = maxMovement;
     }
 
-
     //Check for squares and squares that we can go to
     public List<Square> CalculateValidMoves()
     {
@@ -97,16 +96,24 @@ public class Character : MonoBehaviour
         validEndSquares.Clear();
         validEndSquares.Add(squareStandingOn);
 
-        Vector3 checkBox = new Vector3(remainingMovement * GridSystem.instance.GetSquareSize(), 100, remainingMovement * GridSystem.instance.GetSquareSize());
+        Vector3 checkBox = new Vector3(remainingMovement, 100, remainingMovement);
         Collider[] collisions = Physics.OverlapBox(this.transform.position, checkBox);
 
         foreach (var item in collisions)
         {
             if (item.GetComponent<Square>() != null)
             {
-                if (Pathfinding.GetPath(squareStandingOn, item.GetComponent<Square>()).Count <= remainingMovement && Vector3.Distance(squareStandingOn.transform.position, item.transform.position) <= remainingMovement)
+                if (item.GetComponent<Square>().occupiedSpace)
                 {
-                    validEndSquares.Add(item.GetComponent<Square>());
+                    continue;
+                }
+                if (Pathfinding.GetPath(squareStandingOn, item.GetComponent<Square>()).Count <= remainingMovement)
+                {
+                    float distance = Vector3.Distance(squareStandingOn.transform.position, item.transform.position);
+                    if (Mathf.CeilToInt(distance) <= remainingMovement)
+                    {
+                        validEndSquares.Add(item.GetComponent<Square>());
+                    }
                 }
             }
         }
@@ -159,7 +166,8 @@ public class Character : MonoBehaviour
     bool drawGizmos = false;
     private void OnMouseEnter()
     {
-        if (GridSystem.instance.debugAIChoice)
+        GridSystem.instance.MoveHighlight(squareStandingOn.transform.position);
+        if (GridSystem.instance.debugAIChoice && myTeam == Team.AI)
         {
             DisplayDebug(true);
         }
@@ -167,7 +175,10 @@ public class Character : MonoBehaviour
 
     private void OnMouseExit()
     {
-        DisplayDebug(false);
+        if (GridSystem.instance.debugAIChoice && myTeam == Team.AI)
+        {
+            DisplayDebug(false);
+        }
     }
 
     private void DisplayDebug(bool state)

@@ -30,7 +30,7 @@ public class SquareEditor : Editor
 
         if (GUILayout.Button("Create Object"))
         {
-            selectedSquare.CreateWall(objectToSpawn, placement, rotation);
+            selectedSquare.CreateObject(objectToSpawn, placement, rotation);
         }
 
         if (GUILayout.Button("Clear Square"))

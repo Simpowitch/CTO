@@ -57,6 +57,7 @@ public class AI : MonoBehaviour
             coroutineStop = true;
             while (coroutineStop)
             {
+                yield return new WaitForSeconds(0.5f);
                 if (agent.remainingDistance <= agent.stoppingDistance)
                 {
                     if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)

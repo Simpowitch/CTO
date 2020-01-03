@@ -32,6 +32,13 @@ public class GridSystem : MonoBehaviour
 
     [SerializeField] GameObject highlightObject = null;
 
+    [SerializeField] GameObject squarePrefab = null;
+    public List<Square> allSquares = new List<Square>();
+
+    [SerializeField] List<Transform> gameObjectFloors = new List<Transform>(); //used for different heights
+    public List<Floor> floors = new List<Floor>();
+
+
     private static Square selectedSquare;
     public static Square SelectedSquare
     {
@@ -98,51 +105,133 @@ public class GridSystem : MonoBehaviour
         }
     }
 
-
-    [SerializeField] float squareSize = 1f;
-    public float GetSquareSize()
-    {
-        return squareSize;
-    }
-
-    [SerializeField] GameObject squarePrefab = null;
-    public List<Square> allSquares = new List<Square>();
-
-    public List<Transform> layers = new List<Transform>(); //used for different heights
-
     public void SpawnSquares()
     {
-        for (int i = 0; i < layers.Count; i++)
+        DeleteAllSquares();
+
+        for (int i = 0; i < gameObjectFloors.Count; i++)
         {
-            for (float x = 0; x < layers[i].lossyScale.x; x += squareSize)
+            int floorXSize = Mathf.RoundToInt(gameObjectFloors[i].lossyScale.x);
+            int floorZSize = Mathf.RoundToInt(gameObjectFloors[i].lossyScale.z);
+
+            floors.Add(new Floor(floorXSize, floorZSize));
+
+
+            for (int x = 0; x < floorXSize; x++)
             {
-                for (float z = 0; z < layers[i].lossyScale.z; z += squareSize)
+                for (int z = 0; z < floorZSize; z++)
                 {
-                    Vector3 point = GetNearestPointOnGrid(new Vector3(layers[i].position.x - layers[i].lossyScale.x / 2 + x, layers[i].position.y + layers[i].lossyScale.y / 2, layers[i].position.z - layers[i].lossyScale.z / 2 + z));
+                    Vector3 point = GetNearestPointOnGrid(new Vector3(gameObjectFloors[i].position.x - gameObjectFloors[i].lossyScale.x / 2 + x, gameObjectFloors[i].position.y + gameObjectFloors[i].lossyScale.y / 2, gameObjectFloors[i].position.z - gameObjectFloors[i].lossyScale.z / 2 + z));
                     point += new Vector3(0, squarePrefab.transform.lossyScale.y / 2, 0);
-                    if (CheckIfUniqueSquarePos(point))
-                    {
-                        GameObject newObj = (GameObject)PrefabUtility.InstantiatePrefab(squarePrefab);
-                        newObj.transform.position = point;
-                        allSquares.Add(newObj.GetComponent<Square>());
-                        newObj.transform.SetParent(GameObject.Find("SquareParent").transform);
-                        newObj.name += layers[i].name + "X:" + x + "Z:" + z;
-                    }
+
+                    GameObject newObj = (GameObject)PrefabUtility.InstantiatePrefab(squarePrefab);
+                    newObj.transform.position = point;
+                    allSquares.Add(newObj.GetComponent<Square>());
+                    newObj.transform.SetParent(GameObject.Find("SquareParent").transform);
+                    newObj.name += gameObjectFloors[i].name + " X: " + x + " - Z: " + z;
+
+                    floors[i].squares[x, z] = newObj.GetComponent<Square>();
+                    newObj.GetComponent<Square>().surroundingSquares = new Square[8];
+                    newObj.GetComponent<Square>().objects = new GameObject[5];
                 }
             }
         }
+        //Setup
+        SetSurroundingSquares();
     }
 
-    private bool CheckIfUniqueSquarePos(Vector3 pos)
+    private void SetSurroundingSquares()
     {
-        for (int i = 0; i < allSquares.Count; i++)
+        Debug.Log("Setting up surrounding squares");
+        foreach (var floor in floors)
         {
-            if (allSquares[i].transform.position == pos)
+            int maxX = floor.squares.GetLength(0);
+            int maxZ = floor.squares.GetLength(1);
+
+            for (int x = 0; x < floor.squares.GetLength(0); x++)
             {
-                return false;
+                for (int z = 0; z < floor.squares.GetLength(1); z++)
+                {
+                    //North
+                    if (z + 1 < maxZ)
+                    {
+                        //floor.squares[x, z].northSquare = floor.squares[x, z + 1];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.North] = floor.squares[x, z + 1];
+                    }
+
+                    //North East
+                    if (x + 1 < maxX && z + 1 < maxZ)
+                    {
+                        //floor.squares[x, z].northEastSquare = floor.squares[x + 1, z + 1];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.NorthEast] = floor.squares[x + 1, z + 1];
+                    }
+
+                    //East
+                    if (x + 1 < maxX)
+                    {
+                        //floor.squares[x, z].eastSquare = floor.squares[x + 1, z];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.East] = floor.squares[x + 1, z];
+                    }
+
+                    //South East
+                    if (x + 1 < maxX && z - 1 >= 0)
+                    {
+                        //floor.squares[x, z].southEastSquare = floor.squares[x + 1, z - 1];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.SouthEast] = floor.squares[x + 1, z - 1];
+                    }
+
+                    //South
+                    if (z - 1 >= 0)
+                    {
+                        //floor.squares[x, z].southSquare = floor.squares[x, z - 1];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.South] = floor.squares[x, z - 1];
+                    }
+
+                    //South West
+                    if (x - 1 >= 0 && z -1 >= 0)
+                    {
+                        //floor.squares[x, z].southWestSquare = floor.squares[x - 1, z - 1];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.SouthWest] = floor.squares[x - 1, z - 1];
+                    }
+
+                    //West
+                    if (x - 1 >= 0)
+                    {
+                        //floor.squares[x, z].westSquare = floor.squares[x - 1, z];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.West] = floor.squares[x - 1, z];
+                    }
+
+                    //North West
+                    if (x - 1 >= 0 && z + 1 < maxZ)
+                    {
+                        //floor.squares[x, z].northWestSquare = floor.squares[x - 1, z + 1];
+                        floor.squares[x, z].surroundingSquares[(int)Direction.NorthWest] = floor.squares[x - 1, z + 1];
+                    }
+                }
             }
+
+            ////Adds the neaby squares to a list containing all surrounding squares
+            //for (int i = 0; i < allSquares.Count; i++)
+            //{
+            //    allSquares[i].SetSurroundingSquares();
+            //}
         }
-        return true;
+
+        //for (int i = 0; i < allSquares.Count; i++)
+        //{
+        //    allSquares[i].surroundingSquares.Clear();
+
+        //    Collider[] collisions = Physics.OverlapBox(allSquares[i].transform.position, new Vector3(GetSquareSize(), 0, GetSquareSize()));
+
+        //    foreach (var item in collisions)
+        //    {
+        //        if (item.GetComponent<Square>() && item.GetComponent<Square>() != allSquares[i])
+        //        {
+        //            allSquares[i].surroundingSquares.Add(item.GetComponent<Square>());
+        //        }
+        //    }
+        //}
+
     }
 
     public void DeleteAllSquares()
@@ -152,6 +241,7 @@ public class GridSystem : MonoBehaviour
             allSquares[i].DeleteSquare();
         }
         allSquares.Clear();
+        floors.Clear();
     }
 
     public Vector3 GetNearestPointOnGrid(Vector3 input)
@@ -161,14 +251,14 @@ public class GridSystem : MonoBehaviour
         Vector3 position = input - transform.position + offset;
 
 
-        int xCount = Mathf.RoundToInt(position.x / squareSize);
-        int yCount = Mathf.RoundToInt(position.y / squareSize);
-        int zCount = Mathf.RoundToInt(position.z / squareSize);
+        int xCount = Mathf.RoundToInt(position.x);
+        int yCount = Mathf.RoundToInt(position.y);
+        int zCount = Mathf.RoundToInt(position.z);
 
         Vector3 result = new Vector3(
-            (float)xCount * squareSize,
-            (float)yCount * squareSize,
-            (float)zCount * squareSize);
+            (float)xCount,
+            (float)yCount,
+            (float)zCount);
 
         result += transform.position - offset;
         return result;
@@ -184,13 +274,13 @@ public class GridSystem : MonoBehaviour
         Gizmos.color = gizmoColor;
 
         Vector3 point = Vector3.zero;
-        for (int i = 0; i < layers.Count; i++)
+        for (int i = 0; i < gameObjectFloors.Count; i++)
         {
-            for (float x = 0; x < layers[i].lossyScale.x; x += squareSize)
+            for (float x = 0; x < gameObjectFloors[i].lossyScale.x; x++)
             {
-                for (float z = 0; z < layers[i].lossyScale.z; z += squareSize)
+                for (float z = 0; z < gameObjectFloors[i].lossyScale.z; z++)
                 {
-                    point = GetNearestPointOnGrid(new Vector3(layers[i].position.x - layers[i].lossyScale.x / 2 + x, layers[i].position.y + layers[i].lossyScale.y / 2, layers[i].position.z - layers[i].lossyScale.z / 2 + z));
+                    point = GetNearestPointOnGrid(new Vector3(gameObjectFloors[i].position.x - gameObjectFloors[i].lossyScale.x / 2 + x, gameObjectFloors[i].position.y + gameObjectFloors[i].lossyScale.y / 2, gameObjectFloors[i].position.z - gameObjectFloors[i].lossyScale.z / 2 + z));
                     Gizmos.DrawWireSphere(point, gizmoSize);
                 }
             }
@@ -202,6 +292,17 @@ public class GridSystem : MonoBehaviour
             point = GetNearestPointOnGrid(selectedSquare.transform.position);
             Gizmos.DrawWireSphere(point, gizmoSize);
         }
+    }
+}
+
+[System.Serializable]
+public struct Floor
+{
+    public Square[,] squares;
+
+    public Floor(int x, int z)
+    {
+        squares = new Square[x, z];
     }
 }
 
