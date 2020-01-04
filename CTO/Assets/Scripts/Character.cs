@@ -122,29 +122,31 @@ public class Character : MonoBehaviour
         return validEndSquares;
     }
 
-    List<Character> possibleTargets = new List<Character>();
-    public List<Character> GetPossibleTargets() { return possibleTargets; }
+    //List<Character> possibleTargets = new List<Character>();
+    //public List<Character> GetPossibleTargets() { return possibleTargets; }
 
-    public List<Character> FindPossibleTargets()
-    {
-        possibleTargets.Clear();
-        Collider[] colliders = Physics.OverlapSphere(this.transform.position, weapon.range);
+    //public List<Character> FindPossibleTargets()
+    //{
+    //    possibleTargets.Clear();
+    //    Collider[] colliders = Physics.OverlapSphere(this.transform.position, weapon.range);
 
-        foreach (var item in colliders)
-        {
-            if (item.GetComponent<Character>())
-            {
-                if (Physics.Raycast(this.transform.position, item.transform.position - this.transform.position, out RaycastHit hit, Mathf.Infinity))
-                {
-                    if (hit.transform.GetComponent<Character>() && hit.transform.GetComponent<Character>().myTeam != myTeam)
-                    {
-                        possibleTargets.Add(item.GetComponent<Character>());
-                    }
-                }
-            }
-        }
-        return possibleTargets;
-    }
+    //    foreach (var item in colliders)
+    //    {
+    //        if (item.GetComponent<Character>())
+    //        {
+    //            if (Physics.Raycast(this.transform.position, item.transform.position - this.transform.position, out RaycastHit hit, Mathf.Infinity))
+    //            {
+    //                if (hit.transform.GetComponent<Character>() && hit.transform.GetComponent<Character>().myTeam != myTeam)
+    //                {
+    //                    possibleTargets.Add(item.GetComponent<Character>());
+    //                }
+    //            }
+    //        }
+    //    }
+    //    return possibleTargets;
+    //}
+
+    
 
     public void TakeDamage(int damage)
     {
@@ -166,7 +168,7 @@ public class Character : MonoBehaviour
     bool drawGizmos = false;
     private void OnMouseEnter()
     {
-        GridSystem.instance.MoveHighlight(squareStandingOn.transform.position);
+        GridSystem.instance.MoveSquareHighlight(squareStandingOn);
         if (GridSystem.instance.debugAIChoice && myTeam == Team.AI)
         {
             DisplayDebug(true);

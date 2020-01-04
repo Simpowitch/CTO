@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 
 public class MouseSelection : MonoBehaviour
 {
+    [SerializeField] CameraControls cameraControls = null;
+
     // Update is called once per frame
     void Update()
     {
@@ -13,8 +15,14 @@ public class MouseSelection : MonoBehaviour
         {
             return;
         }
-
+        //If over UI element
         if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
+        //If we are not in top down camera mode
+        if (cameraControls.cameraMode != CameraMode.TopDown)
         {
             return;
         }

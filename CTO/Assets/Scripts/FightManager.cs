@@ -4,105 +4,99 @@ using UnityEngine;
 
 public class FightManager : MonoBehaviour
 {
-    public static bool shootingModeActivated;
+    [SerializeField] CameraControls cameraControls = null;
+
 
     [SerializeField] Camera cam = null;
-    Vector3 originalPos;
-    Quaternion originalRotation;
+    [SerializeField] Transform cameraLookAt = null;
+    Vector3 originalCameraPos;
+    Vector3 originalLookAtPos;
+
+    Weapon activeWeapon;
+    float shootCooldown;
+    float timeBetweenShots;
+    public bool shootingModeActivated;
+
+    [SerializeField] GameObject bulletBlueprint = null;
+
 
     public float shootingTime = 2f;
 
     int bulletsRemaining;
 
-    //public int camSpeed = 5;
-
-    public void InitiateShoot()
+    public void ShowCharacterPerspective()
     {
-        originalPos = cam.transform.position;
-        originalRotation = cam.transform.rotation;
-
-        StartCoroutine(EnterShootMode(CharacterManager.SelectedCharacter.transform.position, CharacterManager.TargetCharacter.transform.position, shootingTime));
-    }
-
-    float lerpSpeed;
-    IEnumerator EnterShootMode(Vector3 endPos, Vector3 target, float time)
-    {
-        //Do Animation
-
-        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Invisible);
-
-
-        shootingModeActivated = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        originalCameraPos = cam.transform.position;
+        originalLookAtPos = cameraLookAt.position;
 
-        cam.transform.position = endPos;
-        cam.transform.LookAt(target);
+
+        Vector3 lookPosition = CharacterManager.TargetCharacter != null ? CharacterManager.TargetCharacter.transform.position : CharacterManager.SelectedCharacter.transform.position + CharacterManager.SelectedCharacter.transform.forward * 1;
+        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Invisible);
+        cameraControls.SetCameraPositions(lookPosition, CharacterManager.SelectedCharacter.transform.position, CameraMode.Character, false);
+    }
+
+    private void InitiateShoot()
+    {
+        //Display that we are in shooting mode
+
+        shootingModeActivated = true;
 
         activeWeapon = CharacterManager.SelectedCharacter.weapon;
         timeBetweenShots = 60f / (float)activeWeapon.rpm;
         shootCooldown = 0;
         bulletsRemaining = activeWeapon.bulletsPerBurst;
 
-        yield return new WaitForSeconds(time);
-        StartCoroutine(ExitShootMode());
+        StartCoroutine(ExitShootModeInSeconds(shootingTime));
     }
 
-    IEnumerator ExitShootMode()
+    private void ExitShootMode()
     {
-        cam.transform.position = originalPos;
-        cam.transform.rotation = originalRotation;
         shootingModeActivated = false;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+
+        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Default);
+        cameraControls.SetCameraPositions(originalLookAtPos, originalCameraPos, CameraMode.TopDown, true);
 
         CharacterManager.SelectedCharacter = null;
         CharacterManager.TargetCharacter = null;
-
-        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Default);
-        yield return null;
-        //do animation
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
+    IEnumerator ExitShootModeInSeconds(float time)
+    {
+        yield return new WaitForSeconds(time);
+        ExitShootMode();
+    }
 
-    public float sensitivityX = 3f;
-    public float sensitivityY = 3f;
+    
 
-    public float minimumX = -360F;
-    public float maximumX = 360F;
-
-    public float minimumY = -60F;
-    public float maximumY = 60F;
-
-    float rotationY = 0F;
-
-    Weapon activeWeapon;
-    float shootCooldown;
-    float timeBetweenShots;
+    
 
     private void Update()
     {
-        if (shootingModeActivated)
+        if (cameraControls.cameraMode == CameraMode.Character)
         {
-            float rotationX = cam.transform.localEulerAngles.y + Input.GetAxis("Mouse X") * sensitivityX;
-
-            rotationY += Input.GetAxis("Mouse Y") * sensitivityY;
-            rotationY = Mathf.Clamp(rotationY, minimumY, maximumY);
-
-            cam.transform.localEulerAngles = new Vector3(-rotationY, rotationX, 0);
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                ExitShootMode();
+                return;
+            }
+            if (shootingModeActivated && bulletsRemaining <= 0)
+            {
+                ExitShootMode();
+                return;
+            }
 
             if (Input.GetKey(KeyCode.Mouse0))
             {
+                if (!shootingModeActivated)
+                {
+                    InitiateShoot();
+                }
                 if (shootCooldown <= 0)
                 {
-                    //if (activeWeapon.bulletsRemaining > 0)
-                    //{
-                    //Shoot();
-                    //}
-                    //else
-                    //{
-                    //    Debug.Log("No more bullets");
-                    //}
                     if (bulletsRemaining > 0)
                     {
                         Shoot();
@@ -118,6 +112,9 @@ public class FightManager : MonoBehaviour
 
     private void Shoot()
     {
+        Vector3 shootingPosition = CharacterManager.SelectedCharacter.squareStandingOn.transform.position + new Vector3(0, CharacterManager.SelectedCharacter.weaponHeight, 0) + CharacterManager.SelectedCharacter.transform.forward * 0.5f;
+        FireBullet(CharacterManager.SelectedCharacter.transform.position, Camera.main.transform.forward);
+
         shootCooldown = timeBetweenShots;
         //activeWeapon.bulletsRemaining--;
         bulletsRemaining--;
@@ -134,12 +131,19 @@ public class FightManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("Missed");
+                Debug.Log("Did not hit a character");
             }
         }
         else
         {
             Debug.Log("Missed");
         }
+    }
+
+    private void FireBullet(Vector3 startPos, Vector3 direction)
+    {
+        GameObject spawnedBullet = Instantiate(bulletBlueprint);
+        spawnedBullet.transform.position = startPos;
+        spawnedBullet.GetComponent<Bullet>().Fire(direction);
     }
 }

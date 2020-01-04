@@ -10,6 +10,7 @@ public enum Direction { North, NorthEast, East, SouthEast, South, SouthWest, Wes
 [System.Serializable]
 public class Square : MonoBehaviour
 {
+    public SquareVisualMode squareVisualMode;
     public bool occupiedSpace = false;
 
     public Square[] surroundingSquares = new Square[8]; //direction
@@ -223,7 +224,14 @@ public class Square : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        GridSystem.instance.MoveHighlight(this.transform.position);
+        if (squareVisualMode != SquareVisualMode.Invisible)
+        {
+            GridSystem.instance.MoveSquareHighlight(this);
+        }
+        else
+        {
+            GridSystem.instance.HideSquareHighlight();
+        }
 
         if (CharacterManager.SelectedCharacter)
         {

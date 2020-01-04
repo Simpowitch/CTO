@@ -28,8 +28,6 @@ public class TurnManager : MonoBehaviour
 
     private void Start()
     {
-        GridSystem.instance.ChangeSquareVisualsAll(SquareVisualMode.Invisible);
-
         for (int i = 0; i < charactersParent.childCount; i++)
         {
             allCharacters.Add(charactersParent.GetChild(i).GetComponent<Character>());

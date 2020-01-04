@@ -57,15 +57,30 @@ public class GridSystem : MonoBehaviour
         }
     }
 
-    public void MoveHighlight(Vector3 newPos)
+    private void Start()
     {
-        highlightObject.transform.position = newPos;
+        ChangeSquareVisualsAll(SquareVisualMode.Default);
+    }
+
+    public void MoveSquareHighlight(Square highlightedSquare)
+    {
+        if (highlightedSquare.squareVisualMode != SquareVisualMode.Invisible)
+        {
+            highlightObject.SetActive(true);
+            highlightObject.transform.position = highlightedSquare.transform.position;
+        }
+    }
+
+    public void HideSquareHighlight()
+    {
+        highlightObject.SetActive(false);
     }
 
     public void ChangeSquareVisuals(List<Square> squares, SquareVisualMode mode)
     {
         for (int i = 0; i < squares.Count; i++)
         {
+            squares[i].squareVisualMode = mode;
             squares[i].gameObject.GetComponent<MeshRenderer>().enabled = true;
             squares[i].transform.GetChild(0).gameObject.SetActive(false);
             switch (mode)
@@ -93,6 +108,7 @@ public class GridSystem : MonoBehaviour
     public void ChangeSquareVisualsAll(SquareVisualMode mode)
     {
         ChangeSquareVisuals(allSquares, mode);
+        HideSquareHighlight();
     }
 
     public bool squareCollisionStatus = true;
@@ -188,7 +204,7 @@ public class GridSystem : MonoBehaviour
                     }
 
                     //South West
-                    if (x - 1 >= 0 && z -1 >= 0)
+                    if (x - 1 >= 0 && z - 1 >= 0)
                     {
                         //floor.squares[x, z].southWestSquare = floor.squares[x - 1, z - 1];
                         floor.squares[x, z].surroundingSquares[(int)Direction.SouthWest] = floor.squares[x - 1, z - 1];
@@ -209,29 +225,7 @@ public class GridSystem : MonoBehaviour
                     }
                 }
             }
-
-            ////Adds the neaby squares to a list containing all surrounding squares
-            //for (int i = 0; i < allSquares.Count; i++)
-            //{
-            //    allSquares[i].SetSurroundingSquares();
-            //}
         }
-
-        //for (int i = 0; i < allSquares.Count; i++)
-        //{
-        //    allSquares[i].surroundingSquares.Clear();
-
-        //    Collider[] collisions = Physics.OverlapBox(allSquares[i].transform.position, new Vector3(GetSquareSize(), 0, GetSquareSize()));
-
-        //    foreach (var item in collisions)
-        //    {
-        //        if (item.GetComponent<Square>() && item.GetComponent<Square>() != allSquares[i])
-        //        {
-        //            allSquares[i].surroundingSquares.Add(item.GetComponent<Square>());
-        //        }
-        //    }
-        //}
-
     }
 
     public void DeleteAllSquares()

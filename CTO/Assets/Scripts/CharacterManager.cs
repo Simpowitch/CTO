@@ -62,27 +62,28 @@ public class CharacterManager : MonoBehaviour
         }
         set
         {
-            if (value == null)
-            {
-                targetCharacter = value;
-            }
-            else if (selectedCharacter)
-            {
-                selectedCharacter.FindPossibleTargets();
-                if (selectedCharacter.GetPossibleTargets().Contains(value))
-                {
-                    targetCharacter = value;
-                }
-            }
+            //if (value == null)
+            //{
+            //    targetCharacter = value;
+            //}
+            //else if (selectedCharacter)
+            //{
+            //    selectedCharacter.FindPossibleTargets();
+            //    if (selectedCharacter.GetPossibleTargets().Contains(value))
+            //    {
+            //        targetCharacter = value;
+            //    }
+            //}
+            targetCharacter = value;
             CharacterManager.instance.UpdateCharacterUI();
         }
     }
 
     [SerializeField] GameObject actionBar = null;
-    [SerializeField] Button shootButton = null;
+    [SerializeField] Button characterShootButton = null;
     private void UpdateCharacterUI()
     {
         actionBar.SetActive((selectedCharacter));
-        shootButton.interactable = (selectedCharacter && targetCharacter);
+        characterShootButton.interactable = (selectedCharacter && targetCharacter);
     }
 }
