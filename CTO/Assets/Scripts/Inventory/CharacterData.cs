@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class CharacterData : ScriptableObject
 {
 
-    public string name;
+    public string characterName;
     public Sprite characterAvatar;
 
     public Equipment primaryEquipment;
@@ -18,7 +18,7 @@ public class CharacterData : ScriptableObject
 
     public CharacterData(string name, Sprite characterAvatar)
     {
-        this.name = name;
+        this.characterName = name;
         this.characterAvatar = characterAvatar;
     }
 }

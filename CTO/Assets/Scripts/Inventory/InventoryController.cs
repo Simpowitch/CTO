@@ -6,7 +6,7 @@ public static class InventoryController
 {
     public static Inventory inventory;
     public static List<CharacterView> characters = new List<CharacterView>();
-    public static CharacterData selectedCharacter;
+    public static Equipment selectedEquipment;
 
     public delegate void VisualHandler();
     public static VisualHandler ViewCharacters = UpdateVisuals;
@@ -27,10 +27,6 @@ public static class InventoryController
         {
             inventory.CreateEquipment();
         }
-    }
-    public static void Method()
-    {
-
     }
 }
 

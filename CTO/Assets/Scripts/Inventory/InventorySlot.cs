@@ -8,6 +8,10 @@ public class InventorySlot : MonoBehaviour
 
     public void OnClick()
     {
+        switch (InventoryController.selectedCharacter.)
+        {
+            default:
+        }
         for (int equipmentIndex = 0; equipmentIndex < InventoryController.inventory.inventory.Count; equipmentIndex++)
         {
             if (InventoryController.inventory.inventory[equipmentIndex] == equipment)
