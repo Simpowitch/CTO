@@ -17,6 +17,7 @@ public class AI : MonoBehaviour
     private bool coroutineStop = true;
 
     [SerializeField] GameObject bulletBlueprint = null;
+    [SerializeField] GameObject damageStatPopupBlueprint = null;
 
     public void StartTurn()
     {
@@ -262,6 +263,9 @@ public class AI : MonoBehaviour
                 target.TakeDamage(myCharacter.weapon.damage);
                 //Shoot visual bullet
                 FireBullet(shootingPosition, target.transform.position - shootingPosition);
+                GameObject instantiatedObject = Instantiate(damageStatPopupBlueprint);
+                instantiatedObject.GetComponent<PopupStat>().WriteText("-" + myCharacter.weapon.damage.ToString());
+                instantiatedObject.transform.position = target.transform.position + new Vector3 (0, target.transform.lossyScale.y, 0);
             }
             else
             {

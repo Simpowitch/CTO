@@ -166,24 +166,9 @@ public class Character : MonoBehaviour
     }
 
     bool drawGizmos = false;
-    private void OnMouseEnter()
-    {
-        GridSystem.instance.MoveSquareHighlight(squareStandingOn);
-        if (GridSystem.instance.debugAIChoice && myTeam == Team.AI)
-        {
-            DisplayDebug(true);
-        }
-    }
+   
 
-    private void OnMouseExit()
-    {
-        if (GridSystem.instance.debugAIChoice && myTeam == Team.AI)
-        {
-            DisplayDebug(false);
-        }
-    }
-
-    private void DisplayDebug(bool state)
+    public void DisplayDebug(bool state)
     {
         drawGizmos = state;
         if (state)
