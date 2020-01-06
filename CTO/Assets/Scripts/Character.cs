@@ -146,7 +146,7 @@ public class Character : MonoBehaviour
     //    return possibleTargets;
     //}
 
-    
+
 
     public void TakeDamage(int damage)
     {

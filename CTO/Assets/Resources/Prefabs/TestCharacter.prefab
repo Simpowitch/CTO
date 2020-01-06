@@ -159,8 +159,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67607e939a4d6b546bf608423cf47a7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   canMove: 0
   maxMovement: 8
   remainingMovement: 8
@@ -170,7 +170,7 @@ MonoBehaviour:
   currentHP: 5
   armor: 0
   weapon:
-    name: 
+    name:
     damage: 0
     rpm: 0
     bulletsPerBurst: 0
