@@ -37,9 +37,9 @@ public class MouseSelection : MonoBehaviour
                 Vector3 roundedPos = GridSystem.instance.GetNearestPointOnGrid(hit.point);
 
                 //If clicked on character
-                if (hit.transform.GetComponent<Character>())
+                if (hit.transform.GetComponent<Bodypart>())
                 {
-                    Character mouseTargetCharacter = hit.transform.GetComponent<Character>();
+                    Character mouseTargetCharacter = hit.transform.GetComponent<Bodypart>().GetCharacter();
 
                     if (mouseTargetCharacter.myTeam == Team.Player)
                     {
@@ -85,9 +85,9 @@ public class MouseSelection : MonoBehaviour
                     }
                 }
                 //If clicked on character
-                else if (hit.transform.GetComponent<Character>())
+                else if (hit.transform.GetComponent<Bodypart>())
                     {
-                        Character mouseTargetCharacter = hit.transform.GetComponent<Character>();
+                        Character mouseTargetCharacter = hit.transform.GetComponent<Bodypart>().GetCharacter();
 
                         if (mouseTargetCharacter.myTeam == Team.Player)
                         {
