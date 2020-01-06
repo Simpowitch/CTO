@@ -299,4 +299,3 @@ public struct Floor
         squares = new Square[x, z];
     }
 }
-
