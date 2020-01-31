@@ -232,4 +232,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoRemovalTime: 3
   timeToRemovalAfterCollision: 0.1
-  bulletSpeed: 60
+  bulletSpeed: 10

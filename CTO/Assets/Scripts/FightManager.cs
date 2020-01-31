@@ -18,8 +18,6 @@ public class FightManager : MonoBehaviour
     public bool shootingModeActivated;
 
     [SerializeField] GameObject bulletBlueprint = null;
-    [SerializeField] GameObject damageStatPopupBlueprint = null;
-
 
     public float shootingTime = 2f;
 
@@ -126,10 +124,6 @@ public class FightManager : MonoBehaviour
             {
                 hit.transform.GetComponent<Bodypart>().ReceiveDamage(activeWeapon.damage);
                 Debug.Log("Target hit: " + hit.transform.name);
-
-                GameObject instantiatedObject = Instantiate(damageStatPopupBlueprint);
-                instantiatedObject.GetComponent<PopupStat>().WriteText("-" + CharacterManager.SelectedCharacter.weapon.damage.ToString());
-                instantiatedObject.transform.position = hit.transform.position + new Vector3(0, hit.transform.lossyScale.y, 0);
             }
             else
             {

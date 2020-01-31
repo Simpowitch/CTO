@@ -111,8 +111,8 @@ MonoBehaviour:
   remainingMovement: 8
   squareStandingOn: {fileID: 0}
   myTeam: 0
-  maxHP: 5
-  currentHP: 5
+  maxHP: 100
+  currentHP: 100
   armor: 0
   weapon:
     name: 
@@ -121,7 +121,7 @@ MonoBehaviour:
     bulletsPerBurst: 0
     range: 0
   aiSquareRanking: []
-  weaponHeight: 1.2
+  weaponHeight: 1.5
 --- !u!1 &8681591780471301404
 GameObject:
   m_ObjectHideFlags: 0
