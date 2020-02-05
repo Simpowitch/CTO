@@ -125,6 +125,14 @@ public class GridSystem : MonoBehaviour
     {
         DeleteAllSquares();
 
+        if (!GameObject.Find("SquareParent"))
+        {
+            GameObject gameObject = Instantiate(new GameObject());
+            gameObject.transform.name = "SquareParent";
+            gameObject.transform.position = Vector3.zero;
+            gameObject.transform.rotation = Quaternion.identity;
+        }
+
         for (int i = 0; i < gameObjectFloors.Count; i++)
         {
             int floorXSize = Mathf.RoundToInt(gameObjectFloors[i].lossyScale.x);
@@ -143,6 +151,9 @@ public class GridSystem : MonoBehaviour
                     GameObject newObj = (GameObject)PrefabUtility.InstantiatePrefab(squarePrefab);
                     newObj.transform.position = point;
                     allSquares.Add(newObj.GetComponent<Square>());
+
+
+
                     newObj.transform.SetParent(GameObject.Find("SquareParent").transform);
                     newObj.name += gameObjectFloors[i].name + " X: " + x + " - Z: " + z;
 

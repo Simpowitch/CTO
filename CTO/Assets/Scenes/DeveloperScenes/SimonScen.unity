@@ -7255,7 +7255,7 @@ PrefabInstance:
     - target: {fileID: 3138609986755813137, guid: d6998723cff41b0458df5a8e1bc8e0b8,
         type: 3}
       propertyPath: occupiedSpace
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3138609986755813137, guid: d6998723cff41b0458df5a8e1bc8e0b8,
         type: 3}

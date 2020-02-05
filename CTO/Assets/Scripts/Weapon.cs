@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[CreateAssetMenu(menuName = "ScriptableObject/Weapon")]
 [System.Serializable]
-public class Weapon
+public class Weapon : ScriptableObject
 {
     public string name;
     public int damage;
@@ -11,4 +12,5 @@ public class Weapon
     public int bulletsPerBurst;
     //public int bulletsRemaining;
     public int range;
+    public GameObject weaponPrefab;
 }
