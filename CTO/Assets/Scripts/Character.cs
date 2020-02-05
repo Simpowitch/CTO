@@ -16,6 +16,8 @@ public class Character : MonoBehaviour
     [SerializeField] int currentHP = 100;
     [SerializeField] int armor = 0;
 
+    [SerializeField] Transform weaponHolder = null;
+
     public Weapon weapon = null;
 
     List<Square> validEndSquares = new List<Square>();
@@ -43,20 +45,18 @@ public class Character : MonoBehaviour
         squareStandingOn = closestSquare;
         squareStandingOn.occupiedSpace = true;
 
-        //Temp weapon
-        weapon = new Weapon();
-        weapon.range = 10;
-        weapon.name = "TestWeapon2000";
-        weapon.damage = 100;
-        weapon.bulletsPerBurst = 3;
-        weapon.rpm = 300;
-        //weapon.bulletsRemaining = weapon.bulletsPerBurst;
-
         //Set up sensors
         Bodypart[] bodyparts = GetComponentsInChildren<Bodypart>();
         foreach (var item in bodyparts)
         {
             bodySensors.Add(item.transform);
+        }
+
+        if (weapon != null)
+        {
+            GameObject w = Instantiate(weapon.weaponPrefab, weaponHolder, true);
+            w.transform.position = weaponHolder.position;
+            w.transform.rotation = weaponHolder.rotation;
         }
     }
 
