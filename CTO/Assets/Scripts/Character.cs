@@ -12,8 +12,8 @@ public class Character : MonoBehaviour
     public Square squareStandingOn;
     public Team myTeam;
 
-    [SerializeField] int maxHP = 5;
-    [SerializeField] int currentHP = 5;
+    [SerializeField] int maxHP = 100;
+    [SerializeField] int currentHP = 100;
     [SerializeField] int armor = 0;
 
     public Weapon weapon = null;
@@ -23,9 +23,9 @@ public class Character : MonoBehaviour
 
 
     public List<SquarePoint> aiSquareRanking = new List<SquarePoint>();
-    Vector3[] bodySensors = new Vector3[3] { new Vector3(0, 1.4f, 0), new Vector3(0, 1, 0), new Vector3(0, 0.3f, 0) };
-    public Vector3[] GetBodySensors() { return bodySensors; }
-    public float weaponHeight = 1.2f;
+    List<Transform> bodySensors = new List<Transform>();
+    public List<Transform> GetBodySensors() { return bodySensors; }
+    public float weaponHeight = 1.5f;
 
     private void Start()
     {
@@ -47,10 +47,17 @@ public class Character : MonoBehaviour
         weapon = new Weapon();
         weapon.range = 10;
         weapon.name = "TestWeapon2000";
-        weapon.damage = 1;
+        weapon.damage = 100;
         weapon.bulletsPerBurst = 3;
-        weapon.rpm = 500;
+        weapon.rpm = 300;
         //weapon.bulletsRemaining = weapon.bulletsPerBurst;
+
+        //Set up sensors
+        Bodypart[] bodyparts = GetComponentsInChildren<Bodypart>();
+        foreach (var item in bodyparts)
+        {
+            bodySensors.Add(item.transform);
+        }
     }
 
     public bool CanMoveToTarget(Square targetSquare)
@@ -150,6 +157,10 @@ public class Character : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        GameObject instantiatedObject = (GameObject) Instantiate(Resources.Load("Prefabs/PopupBillboardStat"));
+        instantiatedObject.GetComponent<PopupStat>().WriteText("-" + damage.ToString());
+        instantiatedObject.transform.position = this.transform.position + new Vector3(0, this.transform.lossyScale.y, 0);
+
         currentHP -= (damage - armor);
         if (currentHP <= 0)
         {

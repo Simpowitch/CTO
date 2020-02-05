@@ -15,6 +15,8 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("Bullet hit: " + collision.transform.name);
+        this.transform.GetComponent<Collider>().enabled = false;
         StartCoroutine(Hit());
     }
 

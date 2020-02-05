@@ -9,15 +9,26 @@ public class AI : MonoBehaviour
 {
     public List<Character> aiCharacters = new List<Character>();
     public List<Character> detectedEnemies = new List<Character>();
-    //public List<Character> enemiesInRange = new List<Character>();
 
     public int hitReward = 2;
     public int exposurePenalty = 1;
+    public int pointsPerCover = 5;
+    public float bulletControl = 0; //from 0 to 1;
+
 
     private bool coroutineStop = true;
 
     [SerializeField] GameObject bulletBlueprint = null;
     [SerializeField] GameObject damageStatPopupBlueprint = null;
+
+    private void Start()
+    {
+        if (bulletControl > 1 || bulletControl < 0)
+        {
+            Debug.LogError("Bullet control of AI not set to a correct number, needs to be within 0 to 1");
+        }
+    }
+
 
     public void StartTurn()
     {
@@ -99,10 +110,37 @@ public class AI : MonoBehaviour
             SquarePoint squarePoint = new SquarePoint(square);
 
             //Give points for enemy targets
-            squarePoint.points += CalculateTargetPoints(character, square, out List<Line> targetHits);
+            int targetPoints = CalculateTargetPoints(character, square, out List<Line> targetHits);
 
-            //Give points if position is behind a cover
-            squarePoint.points -= CalculateExposure(character, square, out List<Line> exposureHits);
+            //Maximum points = bullets that the character can fire
+            targetPoints = Mathf.Min(character.weapon.bulletsPerBurst, targetPoints) * hitReward;
+            squarePoint.points += targetPoints;
+
+            //Take away points per possible hit by enemies
+            int exposurePoints = CalculateExposure(character, square, out List<Line> exposureHits);
+            squarePoint.points -= exposurePoints;
+
+            //Take away points if too close to an enemy and if too far from enemies
+            int distancePoints = CalculateDistanceScores(character, square);
+            squarePoint.points += distancePoints;
+
+            //Give points for cover
+            int coverPoints = 0;
+            foreach (var item in square.objects)
+            {
+                if (item != null)
+                {
+                    coverPoints += pointsPerCover;
+                }
+            }
+            foreach (var item in square.surroundingSquares)
+            {
+                if (item != null && item.objects[0] != null)
+                {
+                    coverPoints += pointsPerCover;
+                }
+            }
+            squarePoint.points += coverPoints;
 
             //Add to list of squares
             character.aiSquareRanking.Add(squarePoint);
@@ -130,11 +168,11 @@ public class AI : MonoBehaviour
 
             foreach (var sensor in enemy.GetBodySensors())
             {
-                Ray ray = new Ray(firePosition, (enemy.squareStandingOn.transform.position + sensor) - firePosition);
+                Ray ray = new Ray(firePosition, sensor.position - firePosition);
 
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    if (hit.transform.GetComponent<Character>() == enemy)
+                    if (hit.transform.GetComponent<Bodypart>() && hit.transform.GetComponent<Bodypart>().GetCharacter() == enemy)
                     {
                         targetPoints += hitReward;
                         lines.Add(new Line(ray.origin, hit.point));
@@ -163,11 +201,12 @@ public class AI : MonoBehaviour
 
             foreach (var sensor in character.GetBodySensors())
             {
-                Ray ray = new Ray(square.transform.position + sensor, firePosition - (square.transform.position + sensor));
+                Vector3 sensorFuturePosition = sensor.position + (square.transform.position - character.squareStandingOn.transform.position);
+                Ray ray = new Ray(sensorFuturePosition, firePosition - sensorFuturePosition);
 
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    if (hit.transform.GetComponent<Character>() == enemy)
+                    if (hit.transform.GetComponent<Bodypart>() && hit.transform.GetComponent<Bodypart>().GetCharacter() == enemy)
                     {
                         exposure += exposurePenalty;
                         lines.Add(new Line(ray.origin, hit.point));
@@ -178,21 +217,36 @@ public class AI : MonoBehaviour
         return exposure;
     }
 
+    private int CalculateDistanceScores(Character character, Square square)
+    {
+        int pointReductionFromDistanceErrors = 10;
+        float preferedMinDistance = 2f;
+        float preferedMaxDistance = character.weapon.range;
+
+        int points = 0;
+
+        foreach (var enemy in detectedEnemies)
+        {
+            float distance = Vector3.Distance(square.transform.position, enemy.transform.position);
+            if (distance < preferedMinDistance)
+            {
+                points -= pointReductionFromDistanceErrors;
+            }
+            if (distance > preferedMaxDistance)
+            {
+                points -= pointReductionFromDistanceErrors;
+            }
+        }
+        return points;
+    }
+
     private void DebugSquareChoice(Character character, Square square)
     {
-        int totPoint = 0;
-
         int targetPoints = CalculateTargetPoints(character, square, out List<Line> hitRays);
         character.debugHitOppertunities = hitRays;
-        totPoint += targetPoints;
-        Debug.Log("Hit score: " + targetPoints);
 
         int exposure = CalculateExposure(character, square, out List<Line> exposureRays);
         character.debugExposureLines = exposureRays;
-        totPoint -= exposure;
-        Debug.Log("Exposure score:" + exposure);
-
-        Debug.Log("Total points: " + totPoint);
     }
 
     private Character GetBestTarget(Character character)
@@ -215,11 +269,11 @@ public class AI : MonoBehaviour
 
             foreach (var sensor in enemy.GetBodySensors())
             {
-                Ray ray = new Ray(firePosition, (enemy.squareStandingOn.transform.position + sensor) - firePosition);
+                Ray ray = new Ray(firePosition, sensor.position - firePosition);
 
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    if (hit.transform.GetComponent<Character>() == enemy)
+                    if (hit.transform.GetComponent<Bodypart>().GetCharacter() == enemy)
                     {
                         points++;
                     }
@@ -246,35 +300,53 @@ public class AI : MonoBehaviour
 
         //camera focus on this character and on target (zoom to fit both)
 
+
         Vector3 shootingPosition = myCharacter.squareStandingOn.transform.position + new Vector3(0, myCharacter.weaponHeight, 0) + myCharacter.transform.forward * 0.5f;
         float timeBetweenShots = 60f / (float)myCharacter.weapon.rpm;
+
+
+        float maxSway = 1 - bulletControl;
+
+        float xOffset = Random.Range(-maxSway, maxSway);
+        float yOffset = Random.Range(-maxSway, maxSway);
+        float zOffset = Random.Range(-maxSway, maxSway);
+        Vector3 aPoint = target.transform.position + new Vector3(xOffset, yOffset, zOffset);
+
+        xOffset = Random.Range(-maxSway, maxSway);
+        yOffset = Random.Range(-maxSway, maxSway);
+        zOffset = Random.Range(-maxSway, maxSway);
+        Vector3 bPoint = target.transform.position + new Vector3(xOffset, yOffset, zOffset);
+
         for (int i = 0; i < myCharacter.weapon.bulletsPerBurst; i++)
         {
-            //if (myCharacter.weapon.bulletsRemaining > 0)
-            //{
-
             //Play audio
 
-            bool hit = true;
-            //myCharacter.weapon.bulletsRemaining--;
-            if (hit)
+            float bulletPercentageFired = i / myCharacter.weapon.bulletsPerBurst - 1;
+
+            Vector3 aimPosition = Vector3.Lerp(aPoint, bPoint, bulletPercentageFired);
+
+            RaycastHit hit;
+
+            FireBullet(shootingPosition, aimPosition - shootingPosition);
+
+            if (Physics.Raycast(shootingPosition, aimPosition - shootingPosition, out hit))
             {
-                Debug.Log("Hit");
-                target.TakeDamage(myCharacter.weapon.damage);
-                //Shoot visual bullet
-                FireBullet(shootingPosition, target.transform.position - shootingPosition);
-                GameObject instantiatedObject = Instantiate(damageStatPopupBlueprint);
-                instantiatedObject.GetComponent<PopupStat>().WriteText("-" + myCharacter.weapon.damage.ToString());
-                instantiatedObject.transform.position = target.transform.position + new Vector3 (0, target.transform.lossyScale.y, 0);
+                if (hit.transform.GetComponent<Bodypart>())
+                {
+                    Debug.DrawRay(shootingPosition, aimPosition - shootingPosition, Color.green);
+                    hit.transform.GetComponent<Bodypart>().ReceiveDamage(myCharacter.weapon.damage);
+                    Debug.Log("Target hit: " + hit.transform.name);
+                }
+                else
+                {
+                    Debug.DrawRay(shootingPosition, aimPosition - shootingPosition, Color.red);
+                    Debug.Log("Did not hit a character");
+                }
             }
             else
             {
-                Debug.Log("Missed");
-
-                //Shoot visual bullet
-                FireBullet(shootingPosition, (target.transform.position + target.transform.up * 2f) - shootingPosition);
+                Debug.Log("Miss");
             }
-            //}
             yield return new WaitForSeconds(timeBetweenShots * 1.5f);
         }
         coroutineStop = false;
